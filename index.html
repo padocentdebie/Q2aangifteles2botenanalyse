@@ -2,8 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Politie Academie - Verhoor & Analyse</title>
+    <title>Politie Academie: High-Performance Analyse</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -11,104 +10,108 @@
 
     <style>
         :root {
-            --police-blue: #2980b9;
-            --police-dark: #1c222d;
+            --police-blue: #1a2a6c;
             --success: #27ae60;
-            --warning: #e67e22;
-            --bg: #0a0e14;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+            --bg-dark: #0f172a;
         }
 
         body { 
-            background-color: var(--bg); 
-            color: #d1d1d1; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; padding: 15px; 
-            height: 100vh; overflow: hidden; box-sizing: border-box;
+            background-color: var(--bg-dark); 
+            color: #e2e8f0; 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; padding: 10px; 
+            height: 100vh; overflow: hidden;
         }
 
-        .main-wrapper { display: flex; gap: 20px; max-width: 1600px; margin: auto; height: calc(100vh - 30px); }
-        
-        /* Linker kolom: Chat/Verhoor */
-        #chat-section { flex: 1; background: #1c222d; border: 2px solid var(--police-blue); display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; }
-        #chat-header { padding: 15px; background: var(--police-blue); color: white; text-align: center; font-weight: bold; letter-spacing: 1px; }
-        #messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f0f3f5; }
-        
-        /* Rechter kolom: Dossier & Analyse */
-        #aangifte-section { flex: 1.5; background: #ffffff; border: 2px solid #bdc3c7; display: flex; flex-direction: column; padding: 20px; border-radius: 12px; color: #333; overflow: hidden; }
-        
-        /* Analyse Dashboard */
-        .analysis-dashboard { 
-            background: #f8f9fa; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 15px;
-            display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-around;
-        }
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; border: 1px solid #ccc; color: #999; }
-        .badge.found { background: var(--success); color: white; border-color: var(--success); }
+        .layout { display: flex; gap: 15px; height: calc(100vh - 20px); max-width: 1800px; margin: auto; }
 
-        /* Tekstvakken */
+        /* Linkerpaneel: De Getuige */
+        .panel-verhoor { flex: 1; background: #1e293b; border-radius: 12px; display: flex; flex-direction: column; border: 1px solid #334155; }
+        #messages { flex: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* Rechterpaneel: Analyse & PV */
+        .panel-analyse { flex: 1.6; background: #ffffff; border-radius: 12px; display: flex; flex-direction: column; color: #1e293b; position: relative; }
+
+        /* Het 10-punts Dashboard */
+        .analysis-grid { 
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 15px; 
+            background: #f1f5f9; border-bottom: 2px solid #e2e8f0;
+        }
+
+        .point-card {
+            position: relative; padding: 10px; background: white; border: 1px solid #cbd5e1;
+            border-radius: 6px; text-align: center; font-size: 0.75em; font-weight: bold;
+            cursor: help; transition: 0.3s; color: #64748b;
+        }
+
+        .point-card.met { background: #dcfce7; border-color: var(--success); color: var(--success); }
+
+        /* De Mousetip/Tooltip */
+        .point-card .tip {
+            visibility: hidden; width: 180px; background-color: #334155; color: #fff;
+            text-align: center; border-radius: 6px; padding: 8px; position: absolute;
+            z-index: 10; bottom: 110%; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; font-weight: normal; font-size: 0.9em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); pointer-events: none;
+        }
+        .point-card:hover .tip { visibility: visible; opacity: 1; }
+
+        /* Editor */
+        .editor-space { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow-y: auto; }
         textarea { 
-            width: 100%; min-height: 120px; box-sizing: border-box; 
-            border: 2px solid #ddd; padding: 12px; resize: none; border-radius: 8px; 
-            font-size: 1em; transition: 0.3s;
+            width: 100%; flex: 1; padding: 15px; border: 2px solid #cbd5e1; 
+            border-radius: 8px; font-size: 1.05em; line-height: 1.6; resize: none; outline: none;
         }
-        textarea:focus { border-color: var(--police-blue); outline: none; }
-        
-        .bubble { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 0.95em; line-height: 1.4; position: relative; }
-        .bot { align-self: flex-start; background: #fff; color: #2c3e50; border-bottom-left-radius: 2px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
-        .user-msg { align-self: flex-end; background: var(--police-blue); color: white; border-bottom-right-radius: 2px; }
+        textarea:focus { border-color: var(--police-blue); box-shadow: 0 0 10px rgba(26,42,108,0.1); }
 
-        .btn { border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 6px; transition: 0.2s; text-transform: uppercase; }
-        .btn-primary { background: var(--police-blue); color: white; }
-        .btn-success { background: var(--success); color: white; width: 100%; margin-top: 10px; }
-        .btn-download { background: var(--warning); color: white; width: 100%; margin-top: 5px; }
+        /* Bubbles */
+        .bubble { padding: 10px 14px; border-radius: 15px; font-size: 0.9em; max-width: 85%; }
+        .bot { align-self: flex-start; background: #e2e8f0; color: #1e293b; }
+        .user { align-self: flex-end; background: var(--police-blue); color: white; }
 
-        #feed-container { margin-top: 20px; border-top: 2px dashed #ddd; padding-top: 10px; overflow-y: auto; }
-        .feed-item { background: #fff; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; border-radius: 8px; font-size: 0.85em; }
-        
-        .scrollable { overflow-y: auto; flex: 1; padding-right: 5px; }
+        /* Info Bar */
+        .info-bar { display: flex; justify-content: space-between; padding: 10px 20px; background: #1a2a6c; color: white; font-size: 0.8em; }
+        .btn-action { background: var(--success); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-    <div id="chat-section">
-        <div id="chat-header">CASUS: DIEFSTAL EVI DE VRIES</div>
-        <div id="messages">
-            <div class="bubble bot"><b>Evi:</b> Hallo... ik ben Evi. Ik ben nog steeds een beetje aan het trillen. Mijn mooie witte fiets is weg... Kunt u me helpen?</div>
+<div class="layout">
+    <div class="panel-verhoor">
+        <div class="info-bar">
+            <span>AGENT: LIVE VERHOOR</span>
+            <span id="timer">TIJD: 00:00</span>
         </div>
-        <div style="padding: 15px; background: white; border-top: 1px solid #ddd; display: flex; gap: 5px;">
-            <input type="text" id="botInput" style="flex:1; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" placeholder="Stel een vraag aan het slachtoffer..." onkeypress="if(event.key==='Enter') chatWithBot()">
-            <button class="btn btn-primary" onclick="chatWithBot()">VRAAG</button>
+        <div id="messages">
+            <div class="bubble bot"><b>Evi:</b> Hallo... ik ben Evi. Mijn witte Gazelle is gestolen bij het Vredenburg. Kunt u een rapport opmaken?</div>
+        </div>
+        <div style="padding:15px; background:white; display:flex; gap:10px;">
+            <input type="text" id="cInput" style="flex:1; padding:10px;" placeholder="Stel een vraag..." onkeypress="if(event.key==='Enter') chat()">
+            <button onclick="chat()" class="btn-action" style="width:auto; margin:0;">STEL VRAAG</button>
         </div>
     </div>
 
-    <div id="aangifte-section">
-        <h2 style="margin-top:0; color: var(--police-blue);">PROCES-VERBAAL</h2>
-        
-        <div class="analysis-dashboard" id="analysisBadges">
-            <span class="badge" id="check-wie">WIE</span>
-            <span class="badge" id="check-wat">WAT</span>
-            <span class="badge" id="check-waar">WAAR</span>
-            <span class="badge" id="check-wanneer">WANNEER</span>
-            <span class="badge" id="check-hoe">HOE (SLOT)</span>
-        </div>
-
-        <div class="scrollable">
-            <div id="pdf-content">
-                <textarea id="pvInput" oninput="analyseerTekst()" placeholder="Begin met het opstellen van het proces-verbaal. Analyseer de chat en noteer de feiten..."></textarea>
-                <button class="btn btn-success" onclick="submitToFirebase()">VERWERK IN DOSSIER</button>
-                <div id="feed-container"></div>
+    <div class="panel-analyse">
+        <div class="analysis-grid" id="grid">
             </div>
-        </div>
-        
-        <div style="margin-top: 10px;">
-            <button class="btn btn-download" onclick="downloadPDF()">GENEREER PDF RAPPORT</button>
-            <button onclick="clearAll()" style="font-size: 0.7em; background: none; border: none; color: #999; cursor: pointer; width: 100%; margin-top: 5px;">Systeem herstellen voor nieuwe student</button>
+
+        <div class="editor-space">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0 0 10px 0;">Proces-Verbaal van Aangifte</h3>
+                <span id="score" style="font-weight:bold; color:var(--success);">Voortgang: 0%</span>
+            </div>
+            <textarea id="pvArea" oninput="analyze()" placeholder="Noteer de feiten op basis van het verhoor..."></textarea>
+            
+            <button class="btn-action" onclick="save()">DOSSIER VOLTOOIEN & OPSLAAN</button>
+            <button onclick="clearDB()" style="background:none; border:none; color:#94a3b8; font-size:0.7em; cursor:pointer; margin-top:5px;">Systeem-reset</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- FIREBASE CONFIG ---
+    // --- DATABASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyC-Of0AUOd-kVo2RKxYc-68Gr-RO4HdRk0",
         authDomain: "q2aangifteles2.firebaseapp.com",
@@ -118,137 +121,92 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- CHAT LOGICA (EVI) ---
-    let state = { wie: 0, fiets: 0, waar: 0, nacht: 0, slot: 0, diefstal: 0 };
-    let heeftFoutGemaakt = false;
+    // --- 10 CRUCIALE PUNTEN DATA ---
+    const checkPoints = [
+        { id: 'p1', label: 'IDENTITEIT', words: ['evi', 'vries'], tip: 'Vermeld de volledige voor- en achternaam van het slachtoffer.' },
+        { id: 'p2', label: 'GEBOORTE', words: ['2002', '4 november'], tip: 'Cruciaal voor het dossier: Wanneer is Evi geboren?' },
+        { id: 'p3', label: 'OBJECT', words: ['gazelle', 'esprit'], tip: 'Specificeer het merk en het type fiets nauwkeurig.' },
+        { id: 'p4', label: 'KLEUR', words: ['wit', 'witte'], tip: 'De kleur is het eerste kenmerk voor opsporing.' },
+        { id: 'p5', label: 'LOCATIE', words: ['vredenburg', '24'], tip: 'Waar precies stond de fiets? (Straat + Huisnummer).' },
+        { id: 'p6', label: 'TIJDSTIP', words: ['3 uur', 'nacht', '03:00'], tip: 'Hoe laat vond de diefstal plaats?' },
+        { id: 'p7', label: 'BEVEILIGING', words: ['slot', 'cijferslot', 'doorgeknipt'], tip: 'Hoe was de fiets beveiligd en wat is de staat van het slot?' },
+        { id: 'p8', label: 'EIGENDOM', words: ['mijn', 'eigenaar', 'toestemming'], tip: 'Staat er expliciet dat zij de eigenaar is en geen toestemming gaf?' },
+        { id: 'p9', label: 'WAARDE', words: ['650', 'euro'], tip: 'Wat is de geschatte waarde/aanschafprijs?' },
+        { id: 'p10', label: 'WOONPLAATS', words: ['utrecht'], tip: 'Vergeet de huidige woonplaats van de aangever niet.' }
+    ];
 
-    const responses = {
-        wie: ["Mijn volledige naam is Evi de Vries. Ik ben 23 jaar.", "Ik ben geboren in Maastricht op 4 november 2002."],
-        fiets: ["Het was een witte Gazelle Esprit. Mijn eigen fiets waar ik zo lang voor gespaard heb.", "Mijn witte Gazelle was 650 euro waard.", "Er zat een handig rieten mandje op."],
-        tegenstrijdig: "Ik mis mijn blauwe fiets zo erg...", 
-        schrik: "Oeps! Oh jee... zei ik blauw? Hij is natuurlijk wit. Ik ben zo in de war.",
-        waar: ["Ik woon aan de Vredenburg 24-B in Utrecht.", "Daar voor de deur bij de lantaarnpaal stond hij."],
-        nacht: ["Rond drie uur vannacht hoorde ik een scooter stilstaan.", "Ik werd wakker van een brommer en voetstappen onder mijn raam."],
-        slot: ["Hij stond vast met een dik cijferslot. Dat slot ligt nu kapot op straat.", "Mijn slot is vernield... het ligt nog bij de lantaarnpaal."],
-        diefstal: ["Ja, mijn witte Gazelle is gestolen! Hij is weg.", "De dief heeft mijn fiets meegenomen terwijl ik sliep."],
-        toestemming: ["Natuurlijk heb ik geen toestemming gegeven! Het is MIJN fiets."],
-        onzin: ["Ik begrijp niet wat dat met mijn fiets te maken heeft...", "Kunt u dat anders vragen?"]
-    };
+    // --- DASHBOARD GENEREREN ---
+    const grid = document.getElementById('grid');
+    checkPoints.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'point-card';
+        div.id = p.id;
+        div.innerHTML = `${p.label} <span class="tip">${p.tip}</span>`;
+        grid.appendChild(div);
+    });
 
-    function chatWithBot() {
-        const input = document.getElementById('botInput');
-        const val = input.value.trim().toLowerCase();
-        if(!val) return;
+    // --- ANALYSE FUNCTIE ---
+    function analyze() {
+        const text = document.getElementById('pvArea').value.toLowerCase();
+        let score = 0;
 
-        addBubble(input.value, 'user-msg');
-        input.value = '';
+        checkPoints.forEach(p => {
+            const isFound = p.words.some(word => text.includes(word));
+            const el = document.getElementById(p.id);
+            if(isFound) {
+                el.classList.add('met');
+                score++;
+            } else {
+                el.classList.remove('met');
+            }
+        });
+
+        document.getElementById('score').innerText = `Voortgang: ${score * 10}%`;
+        if(score === 10) document.getElementById('score').style.color = "#27ae60";
+    }
+
+    // --- TIMER ---
+    let seconds = 0;
+    setInterval(() => {
+        seconds++;
+        let m = Math.floor(seconds / 60);
+        let s = seconds % 60;
+        document.getElementById('timer').innerText = `TIJD: ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+
+    // --- CHAT & FIREBASE ---
+    function chat() {
+        const inp = document.getElementById('cInput');
+        const m = document.getElementById('messages');
+        if(!inp.value) return;
+        
+        m.innerHTML += `<div class="bubble user">${inp.value}</div>`;
+        const v = inp.value.toLowerCase();
+        inp.value = '';
 
         setTimeout(() => {
-            let reply;
-            if (heeftFoutGemaakt && (val.includes("blauw") || val.includes("wit") || val.includes("fout"))) {
-                reply = responses.schrik; heeftFoutGemaakt = false;
-            } else if (val.includes("toestemming") || val.includes("mogen")) {
-                reply = responses.toestemming[0];
-            } else if (val.includes("gestolen") || val.includes("diefstal")) {
-                reply = responses.diefstal[state.diefstal % 2]; state.diefstal++;
-            } else if (val.includes("slot") || val.includes("kapot")) {
-                reply = responses.slot[state.slot % 2]; state.slot++;
-            } else if (val.includes("fiets") || val.includes("kleur")) {
-                if (!heeftFoutGemaakt && Math.random() > 0.7) {
-                    reply = responses.tegenstrijdig; heeftFoutGemaakt = true;
-                } else {
-                    reply = responses.fiets[state.fiets % 3]; state.fiets++;
-                }
-            } else if (val.includes("wie") || val.includes("naam")) {
-                reply = responses.wie[state.wie % 2]; state.wie++;
-            } else if (val.includes("waar") || val.includes("adres") || val.includes("vredenburg")) {
-                reply = responses.waar[state.waar % 2]; state.waar++;
-            } else if (val.includes("nacht") || val.includes("tijd") || val.includes("uur")) {
-                reply = responses.nacht[state.nacht % 2]; state.nacht++;
-            } else {
-                reply = responses.onzin[Math.floor(Math.random() * responses.onzin.length)];
-            }
-            addBubble("<b>Evi:</b> " + reply, 'bot');
+            let r = "Kunt u dat nog eens vragen? Ik ben een beetje in de war.";
+            if(v.includes("naam")) r = "Mijn naam is Evi de Vries.";
+            if(v.includes("geboren")) r = "Ik ben geboren op 4 november 2002.";
+            if(v.includes("fiets") || v.includes("merk")) r = "Het is een witte Gazelle Esprit, hij kostte 650 euro.";
+            if(v.includes("waar")) r = "Bij het Vredenburg 24-B, aan een lantaarnpaal.";
+            if(v.includes("slot")) r = "Ik had een cijferslot, maar dat is doorgeknipt.";
+            if(v.includes("hoe laat")) r = "Ik hoorde vannacht rond 3 uur lawaai.";
+            
+            m.innerHTML += `<div class="bubble bot"><b>Evi:</b> ${r}</div>`;
+            m.scrollTop = m.scrollHeight;
         }, 600);
     }
 
-    function addBubble(text, side) {
-        const div = document.createElement('div');
-        div.className = `bubble ${side}`;
-        div.innerHTML = text;
-        const msgContainer = document.getElementById('messages');
-        msgContainer.appendChild(div);
-        msgContainer.scrollTop = msgContainer.scrollHeight;
+    function save() {
+        const pv = document.getElementById('pvArea').value;
+        db.ref('archief').push({ tekst: pv, tijd: document.getElementById('timer').innerText });
+        alert("PV opgeslagen in het politiesysteem.");
+        document.getElementById('pvArea').value = '';
+        analyze();
     }
 
-    // --- DIDACTISCHE ANALYSE APP LOGICA ---
-    function analyseerTekst() {
-        const tekst = document.getElementById('pvInput').value.toLowerCase();
-        
-        const criteria = {
-            'check-wie': ["evi", "de vries", "23", "maastricht"],
-            'check-wat': ["gazelle", "fiets", "wit", "esprit", "mandje"],
-            'check-waar': ["vredenburg", "24", "utrecht", "lantaarnpaal"],
-            'check-wanneer': ["nacht", "3", "drie", "uur", "03:00"],
-            'check-hoe': ["slot", "cijferslot", "doorgeknipt", "vernield", "kapot"]
-        };
-
-        for (let id in criteria) {
-            const element = document.getElementById(id);
-            const matches = criteria[id].filter(word => tekst.includes(word));
-            if (matches.length >= 1) {
-                element.classList.add('found');
-            } else {
-                element.classList.remove('found');
-            }
-        }
-    }
-
-    // --- DATABASE & PDF ---
-    function submitToFirebase() {
-        const tekst = document.getElementById('pvInput').value.trim();
-        if(!tekst) return;
-        db.ref('posts').push({ tekst: tekst, feedback: "", timestamp: new Date().toLocaleString() });
-        document.getElementById('pvInput').value = '';
-        analyseerTekst(); // Reset badges
-    }
-
-    function addFeedback(id) {
-        const fb = document.getElementById('fb-in-'+id).value;
-        if(!fb) return;
-        db.ref('posts/' + id).update({ feedback: fb });
-    }
-
-    function downloadPDF() {
-        const element = document.getElementById('pdf-content');
-        const opt = { margin: 10, filename: 'PV_Evi_de_Vries.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
-        html2pdf().set(opt).from(element).save();
-    }
-
-    function clearAll() { if(confirm("Database wissen?")) db.ref('posts').remove(); }
-
-    db.ref('posts').on('value', (snap) => {
-        const container = document.getElementById('feed-container');
-        container.innerHTML = "<h4>RECENTER DOSSIER VERSLAGES</h4>";
-        const data = snap.val();
-        if(data) {
-            Object.keys(data).reverse().forEach(id => {
-                const item = data[id];
-                const div = document.createElement('div');
-                div.className = 'feed-item';
-                div.innerHTML = `
-                    <div style="color:var(--police-blue); font-size:0.8em;">${item.timestamp}</div>
-                    <p>${item.tekst}</p>
-                    <div style="color:var(--warning); font-weight:bold;">Docent Feedback: ${item.feedback || 'Nog geen feedback...'}</div>
-                    <div style="display:flex; gap:5px; margin-top:10px;">
-                        <input type="text" id="fb-in-${id}" placeholder="Geef feedback..." style="flex:1; padding:5px;">
-                        <button class="btn btn-primary" style="padding:5px;" onclick="addFeedback('${id}')">OK</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-    });
+    function clearDB() { if(confirm("Systeem resetten?")) db.ref('archief').remove(); }
 </script>
 </body>
 </html>
