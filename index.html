@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politie Academie - Verhoor & Analyse</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --police-blue: #2980b9;
+            --police-dark: #1c222d;
+            --success: #27ae60;
+            --warning: #e67e22;
+            --bg: #0a0e14;
+        }
+
+        body { 
+            background-color: var(--bg); 
+            color: #d1d1d1; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 15px; 
+            height: 100vh; overflow: hidden; box-sizing: border-box;
+        }
+
+        .main-wrapper { display: flex; gap: 20px; max-width: 1600px; margin: auto; height: calc(100vh - 30px); }
+        
+        /* Linker kolom: Chat/Verhoor */
+        #chat-section { flex: 1; background: #1c222d; border: 2px solid var(--police-blue); display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; }
+        #chat-header { padding: 15px; background: var(--police-blue); color: white; text-align: center; font-weight: bold; letter-spacing: 1px; }
+        #messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #f0f3f5; }
+        
+        /* Rechter kolom: Dossier & Analyse */
+        #aangifte-section { flex: 1.5; background: #ffffff; border: 2px solid #bdc3c7; display: flex; flex-direction: column; padding: 20px; border-radius: 12px; color: #333; overflow: hidden; }
+        
+        /* Analyse Dashboard */
+        .analysis-dashboard { 
+            background: #f8f9fa; border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 15px;
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-around;
+        }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; border: 1px solid #ccc; color: #999; }
+        .badge.found { background: var(--success); color: white; border-color: var(--success); }
+
+        /* Tekstvakken */
+        textarea { 
+            width: 100%; min-height: 120px; box-sizing: border-box; 
+            border: 2px solid #ddd; padding: 12px; resize: none; border-radius: 8px; 
+            font-size: 1em; transition: 0.3s;
+        }
+        textarea:focus { border-color: var(--police-blue); outline: none; }
+        
+        .bubble { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 0.95em; line-height: 1.4; position: relative; }
+        .bot { align-self: flex-start; background: #fff; color: #2c3e50; border-bottom-left-radius: 2px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
+        .user-msg { align-self: flex-end; background: var(--police-blue); color: white; border-bottom-right-radius: 2px; }
+
+        .btn { border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 6px; transition: 0.2s; text-transform: uppercase; }
+        .btn-primary { background: var(--police-blue); color: white; }
+        .btn-success { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        .btn-download { background: var(--warning); color: white; width: 100%; margin-top: 5px; }
+
+        #feed-container { margin-top: 20px; border-top: 2px dashed #ddd; padding-top: 10px; overflow-y: auto; }
+        .feed-item { background: #fff; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; border-radius: 8px; font-size: 0.85em; }
+        
+        .scrollable { overflow-y: auto; flex: 1; padding-right: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div id="chat-section">
+        <div id="chat-header">CASUS: DIEFSTAL EVI DE VRIES</div>
+        <div id="messages">
+            <div class="bubble bot"><b>Evi:</b> Hallo... ik ben Evi. Ik ben nog steeds een beetje aan het trillen. Mijn mooie witte fiets is weg... Kunt u me helpen?</div>
+        </div>
+        <div style="padding: 15px; background: white; border-top: 1px solid #ddd; display: flex; gap: 5px;">
+            <input type="text" id="botInput" style="flex:1; padding: 10px; border-radius: 4px; border: 1px solid #ccc;" placeholder="Stel een vraag aan het slachtoffer..." onkeypress="if(event.key==='Enter') chatWithBot()">
+            <button class="btn btn-primary" onclick="chatWithBot()">VRAAG</button>
+        </div>
+    </div>
+
+    <div id="aangifte-section">
+        <h2 style="margin-top:0; color: var(--police-blue);">PROCES-VERBAAL</h2>
+        
+        <div class="analysis-dashboard" id="analysisBadges">
+            <span class="badge" id="check-wie">WIE</span>
+            <span class="badge" id="check-wat">WAT</span>
+            <span class="badge" id="check-waar">WAAR</span>
+            <span class="badge" id="check-wanneer">WANNEER</span>
+            <span class="badge" id="check-hoe">HOE (SLOT)</span>
+        </div>
+
+        <div class="scrollable">
+            <div id="pdf-content">
+                <textarea id="pvInput" oninput="analyseerTekst()" placeholder="Begin met het opstellen van het proces-verbaal. Analyseer de chat en noteer de feiten..."></textarea>
+                <button class="btn btn-success" onclick="submitToFirebase()">VERWERK IN DOSSIER</button>
+                <div id="feed-container"></div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 10px;">
+            <button class="btn btn-download" onclick="downloadPDF()">GENEREER PDF RAPPORT</button>
+            <button onclick="clearAll()" style="font-size: 0.7em; background: none; border: none; color: #999; cursor: pointer; width: 100%; margin-top: 5px;">Systeem herstellen voor nieuwe student</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyC-Of0AUOd-kVo2RKxYc-68Gr-RO4HdRk0",
+        authDomain: "q2aangifteles2.firebaseapp.com",
+        databaseURL: "https://q2aangifteles2-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "q2aangifteles2"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // --- CHAT LOGICA (EVI) ---
+    let state = { wie: 0, fiets: 0, waar: 0, nacht: 0, slot: 0, diefstal: 0 };
+    let heeftFoutGemaakt = false;
+
+    const responses = {
+        wie: ["Mijn volledige naam is Evi de Vries. Ik ben 23 jaar.", "Ik ben geboren in Maastricht op 4 november 2002."],
+        fiets: ["Het was een witte Gazelle Esprit. Mijn eigen fiets waar ik zo lang voor gespaard heb.", "Mijn witte Gazelle was 650 euro waard.", "Er zat een handig rieten mandje op."],
+        tegenstrijdig: "Ik mis mijn blauwe fiets zo erg...", 
+        schrik: "Oeps! Oh jee... zei ik blauw? Hij is natuurlijk wit. Ik ben zo in de war.",
+        waar: ["Ik woon aan de Vredenburg 24-B in Utrecht.", "Daar voor de deur bij de lantaarnpaal stond hij."],
+        nacht: ["Rond drie uur vannacht hoorde ik een scooter stilstaan.", "Ik werd wakker van een brommer en voetstappen onder mijn raam."],
+        slot: ["Hij stond vast met een dik cijferslot. Dat slot ligt nu kapot op straat.", "Mijn slot is vernield... het ligt nog bij de lantaarnpaal."],
+        diefstal: ["Ja, mijn witte Gazelle is gestolen! Hij is weg.", "De dief heeft mijn fiets meegenomen terwijl ik sliep."],
+        toestemming: ["Natuurlijk heb ik geen toestemming gegeven! Het is MIJN fiets."],
+        onzin: ["Ik begrijp niet wat dat met mijn fiets te maken heeft...", "Kunt u dat anders vragen?"]
+    };
+
+    function chatWithBot() {
+        const input = document.getElementById('botInput');
+        const val = input.value.trim().toLowerCase();
+        if(!val) return;
+
+        addBubble(input.value, 'user-msg');
+        input.value = '';
+
+        setTimeout(() => {
+            let reply;
+            if (heeftFoutGemaakt && (val.includes("blauw") || val.includes("wit") || val.includes("fout"))) {
+                reply = responses.schrik; heeftFoutGemaakt = false;
+            } else if (val.includes("toestemming") || val.includes("mogen")) {
+                reply = responses.toestemming[0];
+            } else if (val.includes("gestolen") || val.includes("diefstal")) {
+                reply = responses.diefstal[state.diefstal % 2]; state.diefstal++;
+            } else if (val.includes("slot") || val.includes("kapot")) {
+                reply = responses.slot[state.slot % 2]; state.slot++;
+            } else if (val.includes("fiets") || val.includes("kleur")) {
+                if (!heeftFoutGemaakt && Math.random() > 0.7) {
+                    reply = responses.tegenstrijdig; heeftFoutGemaakt = true;
+                } else {
+                    reply = responses.fiets[state.fiets % 3]; state.fiets++;
+                }
+            } else if (val.includes("wie") || val.includes("naam")) {
+                reply = responses.wie[state.wie % 2]; state.wie++;
+            } else if (val.includes("waar") || val.includes("adres") || val.includes("vredenburg")) {
+                reply = responses.waar[state.waar % 2]; state.waar++;
+            } else if (val.includes("nacht") || val.includes("tijd") || val.includes("uur")) {
+                reply = responses.nacht[state.nacht % 2]; state.nacht++;
+            } else {
+                reply = responses.onzin[Math.floor(Math.random() * responses.onzin.length)];
+            }
+            addBubble("<b>Evi:</b> " + reply, 'bot');
+        }, 600);
+    }
+
+    function addBubble(text, side) {
+        const div = document.createElement('div');
+        div.className = `bubble ${side}`;
+        div.innerHTML = text;
+        const msgContainer = document.getElementById('messages');
+        msgContainer.appendChild(div);
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    // --- DIDACTISCHE ANALYSE APP LOGICA ---
+    function analyseerTekst() {
+        const tekst = document.getElementById('pvInput').value.toLowerCase();
+        
+        const criteria = {
+            'check-wie': ["evi", "de vries", "23", "maastricht"],
+            'check-wat': ["gazelle", "fiets", "wit", "esprit", "mandje"],
+            'check-waar': ["vredenburg", "24", "utrecht", "lantaarnpaal"],
+            'check-wanneer': ["nacht", "3", "drie", "uur", "03:00"],
+            'check-hoe': ["slot", "cijferslot", "doorgeknipt", "vernield", "kapot"]
+        };
+
+        for (let id in criteria) {
+            const element = document.getElementById(id);
+            const matches = criteria[id].filter(word => tekst.includes(word));
+            if (matches.length >= 1) {
+                element.classList.add('found');
+            } else {
+                element.classList.remove('found');
+            }
+        }
+    }
+
+    // --- DATABASE & PDF ---
+    function submitToFirebase() {
+        const tekst = document.getElementById('pvInput').value.trim();
+        if(!tekst) return;
+        db.ref('posts').push({ tekst: tekst, feedback: "", timestamp: new Date().toLocaleString() });
+        document.getElementById('pvInput').value = '';
+        analyseerTekst(); // Reset badges
+    }
+
+    function addFeedback(id) {
+        const fb = document.getElementById('fb-in-'+id).value;
+        if(!fb) return;
+        db.ref('posts/' + id).update({ feedback: fb });
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('pdf-content');
+        const opt = { margin: 10, filename: 'PV_Evi_de_Vries.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    function clearAll() { if(confirm("Database wissen?")) db.ref('posts').remove(); }
+
+    db.ref('posts').on('value', (snap) => {
+        const container = document.getElementById('feed-container');
+        container.innerHTML = "<h4>RECENTER DOSSIER VERSLAGES</h4>";
+        const data = snap.val();
+        if(data) {
+            Object.keys(data).reverse().forEach(id => {
+                const item = data[id];
+                const div = document.createElement('div');
+                div.className = 'feed-item';
+                div.innerHTML = `
+                    <div style="color:var(--police-blue); font-size:0.8em;">${item.timestamp}</div>
+                    <p>${item.tekst}</p>
+                    <div style="color:var(--warning); font-weight:bold;">Docent Feedback: ${item.feedback || 'Nog geen feedback...'}</div>
+                    <div style="display:flex; gap:5px; margin-top:10px;">
+                        <input type="text" id="fb-in-${id}" placeholder="Geef feedback..." style="flex:1; padding:5px;">
+                        <button class="btn btn-primary" style="padding:5px;" onclick="addFeedback('${id}')">OK</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    });
+</script>
+</body>
+</html>
