@@ -429,7 +429,7 @@
         studentNaam = document.getElementById('loginStudentNaam').value.trim() || "Student";
         sessionStorage.setItem('politie_klas', actieveKlas);
         sessionStorage.setItem('politie_student', studentNaam);
-        document.getElementById('klasDisplay').innerText = `Klas: actieveKlas({studentNaam})`;
+        document.getElementById('klasDisplay').innerText = `Klas: ${actieveKlas} (${studentNaam})`;
         document.getElementById('loginOverlay').style.display = 'none';
     }
 
@@ -624,7 +624,7 @@ GEDRAGSREGELS:
         const dash = document.getElementById('dash');
         dash.innerHTML = "";
         actieveCasus.criteria.forEach(c => {
-            dash.innerHTML += `<div class="point" id="c.id">{c.l}</div>`;
+            dash.innerHTML += `<div class="point" id="${c.id}">${c.l}</div>`;
         });
 
         analyseerTekst();
@@ -661,7 +661,7 @@ GEDRAGSREGELS:
         chatHistorie.push({ role: "user", content: vraag });
 
         const thinkingId = "thinking-" + Date.now();
-        box.innerHTML += `<div id="thinkingId"class="bubblethinking"><b>{actieveCasus.naam}</b> formuleert een antwoord...</div>`;
+        box.innerHTML += `<div id="${thinkingId}" class="bubble thinking"><b>${actieveCasus.naam}</b> formuleert een antwoord...</div>`;
         box.scrollTop = box.scrollHeight;
 
         isWaitingForAI = true;
@@ -814,7 +814,7 @@ Huidige emotionele status: ${stressStatus}. Verwerk dit subtiel in je stijl, maa
                     const el = document.createElement('div');
                     el.className = 'feed-item';
                     el.innerHTML = `
-                        <span><b>[${item.klas || 'Klas'}] item.casus||'Casus':</b>"{item.tekst || ''}"</span>
+                        <span><b>[${item.klas || 'Klas'}] ${item.casus || 'Casus'}:</b> "${item.tekst || ''}"</span>
                         <span class="feed-badge">✓ ${item.tijdstip || 'Zojuist'}</span>
                     `;
                     feedList.appendChild(el);
@@ -828,7 +828,13 @@ Huidige emotionele status: ${stressStatus}. Verwerk dit subtiel in je stijl, maa
     // --- GRAMMATICA TABBLAD GENEREREN EN NAKIJK-LOGICA ---
     function renderGrammaticaOefening() {
         const container = document.getElementById('grammaticaList');
-        container.innerHTML = "";
+        container.innerHTML = `
+            <div style="background:#0f172a; border: 1px solid #38bdf8; border-radius:8px; padding:12px 16px; margin-bottom:6px; font-size:0.88em; line-height:1.5;">
+                <b style="color:#38bdf8;">📌 Voorbeeldopdracht:</b><br>
+                <span style="color:#94a3b8;">Voorbeeldzin in de VTT:</span> <i>"De agenten <b>hebben</b> de verdachte op heterdaad <b>betrapt</b>."</i><br>
+                <span style="color:#4ade80;">Jouw antwoord in de OVT:</span> Typ <b>betrapten</b> in het invulvak.
+            </div>
+        `;
 
         grammaticaData.forEach((item, index) => {
             const card = document.createElement('div');
@@ -836,7 +842,7 @@ Huidige emotionele status: ${stressStatus}. Verwerk dit subtiel in je stijl, maa
             card.id = `card-${index}`;
 
             card.innerHTML = `
-                <div class="vtt-orig"><b>VTT (index+1):</b><i>"{item.vtt}"</i></div>
+                <div class="vtt-orig"><b>Voorbeeldzin VTT (${index + 1}):</b> <i>"${item.vtt}"</i></div>
                 <div class="ovt-gap-line">
                     <span>${item.voor}</span>
                     <input type="text" class="gap-inp" id="gap-${index}" placeholder="" 
@@ -934,11 +940,10 @@ Huidige emotionele status: ${stressStatus}. Verwerk dit subtiel in je stijl, maa
         if(opgeslagenKlas) {
             actieveKlas = opgeslagenKlas;
             studentNaam = opgeslagenStudent || "Student";
-            document.getElementById('klasDisplay').innerText = `Klas: actieveKlas({studentNaam})`;
+            document.getElementById('klasDisplay').innerText = `Klas: ${actieveKlas} (${studentNaam})`;
             document.getElementById('loginOverlay').style.display = 'none';
         }
     };
 </script>
 </body>
 </html>
-
