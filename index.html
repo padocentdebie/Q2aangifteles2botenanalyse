@@ -2,8 +2,13 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Politie Academie: Geïntegreerde Verhoor-Analyse</title>
+    <title>Politie Academie: Geïntegreerde Verhoor-Analyse & Grammatica</title>
     
+    <!-- Handschriftlettertype voor de correctie -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,12 +18,40 @@
             --police: #1a2a6c; --success: #27ae60; --warning: #f39c12; --danger: #e74c3c;
         }
 
+        * { box-sizing: border-box; }
+
         body { 
             background: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 10px; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
         }
 
-        .app-container { display: flex; gap: 15px; height: calc(100vh - 20px); }
+        /* Navigatie Tabbladen */
+        .tab-nav {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+        }
+        .tab-btn-group { display: flex; gap: 10px; }
+        .tab-btn {
+            background: #1e293b; color: #94a3b8; border: 1px solid #334155;
+            padding: 10px 18px; border-radius: 8px; font-weight: bold; font-size: 0.9em;
+            cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;
+        }
+        .tab-btn:hover { background: #334155; color: #fff; }
+        .tab-btn.active { background: var(--police); color: #fff; border-color: #3b82f6; }
+
+        .casus-badge {
+            background: #334155; color: #38bdf8; padding: 8px 14px; border-radius: 8px;
+            font-size: 0.85em; font-weight: bold; border: 1px solid #475569; display: flex; align-items: center; gap: 8px;
+        }
+        .casus-select {
+            background: #0f172a; color: #f8fafc; border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;
+        }
+
+        .tab-content { display: none; height: calc(100vh - 65px); }
+        .tab-content.active { display: flex; }
+
+        /* Aangifte Tab */
+        .app-container { display: flex; gap: 15px; width: 100%; height: 100%; }
 
         /* Verhoor Sectie */
         .verhoor-box { flex: 1; background: #1e293b; border-radius: 12px; display: flex; flex-direction: column; border: 1px solid #334155; }
@@ -53,113 +86,788 @@
         #stress-meter { height: 4px; background: var(--success); width: 100%; transition: 1s; }
 
         /* Editor */
-        .editor { flex: 1; padding: 20px; display: flex; flex-direction: column; }
-        textarea { flex: 1; padding: 15px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 1em; line-height: 1.5; resize: none; outline: none; }
+        .editor { flex: 1; padding: 15px 20px; display: flex; flex-direction: column; overflow: hidden; }
+        textarea { flex: 1; min-height: 130px; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 0.95em; line-height: 1.4; resize: none; outline: none; }
         
         .bubble { padding: 10px 15px; border-radius: 15px; font-size: 0.9em; max-width: 85%; line-height: 1.4; }
         .evi { align-self: flex-start; background: #e2e8f0; color: #1e293b; }
         .agent { align-self: flex-end; background: var(--police); color: white; }
+        .thinking { font-style: italic; color: #64748b; background: #e2e8f0; }
 
-        .btn-save { background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-save { flex: 1; background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-save:hover { background: #219653; }
+        .btn-reset { background: #b91c1c; color: white; border: none; padding: 12px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-reset:hover { background: #991b1b; }
+
+        /* Livefeed klasgenoten */
+        .livefeed-box {
+            margin-top: 10px; background: #f8fafc; border: 1px solid #cbd5e1;
+            border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column;
+            max-height: 90px;
+        }
+        .livefeed-header {
+            display: flex; justify-content: space-between; font-size: 0.78em; font-weight: bold; color: #334155; margin-bottom: 4px;
+        }
+        .livefeed-items {
+            overflow-y: auto; display: flex; flex-direction: column; gap: 4px; max-height: 60px;
+        }
+        .feed-item {
+            font-size: 0.74em; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px;
+            padding: 3px 6px; display: flex; justify-content: space-between; align-items: center; gap: 6px;
+        }
+        .feed-badge {
+            background: #dcfce7; color: #15803d; font-weight: bold; padding: 2px 5px; border-radius: 4px; font-size: 0.85em; white-space: nowrap;
+        }
+
+        /* Quizlet Tab */
+        .quizlet-container {
+            width: 100%; height: 100%; background: #1e293b; border-radius: 12px;
+            border: 1px solid #334155; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .quizlet-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; background: #0f172a; border-bottom: 1px solid #334155;
+        }
+        .quizlet-frame {
+            flex: 1; width: 100%; border: none; background: #ffffff;
+        }
+        .btn-external {
+            background: #2563eb; color: #fff; text-decoration: none; padding: 8px 14px;
+            border-radius: 6px; font-size: 0.85em; font-weight: bold; transition: 0.2s;
+        }
+        .btn-external:hover { background: #1d4ed8; }
+
+        /* Tab 3: Grammatica Styles */
+        .grammatica-container {
+            display: flex; gap: 15px; width: 100%; height: 100%; overflow: hidden;
+        }
+        .grammatica-list-box {
+            flex: 1.7; background: #1e293b; border-radius: 12px; border: 1px solid #334155;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .grammatica-header {
+            padding: 14px 20px; background: #0f172a; border-bottom: 1px solid #334155;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .grammatica-scroll {
+            flex: 1; overflow-y: auto; padding: 15px 20px; display: flex; flex-direction: column; gap: 14px;
+        }
+        .sentence-card {
+            background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px;
+            transition: all 0.2s ease;
+        }
+        .sentence-card.is-correct { border-color: var(--success); background: #064e3b22; }
+        .sentence-card.is-wrong { border-color: var(--warning); background: #78350f22; }
+        
+        .vtt-orig { font-size: 0.85em; color: #94a3b8; margin-bottom: 6px; }
+        .ovt-gap-line { font-size: 0.98em; color: #f8fafc; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+        
+        .gap-inp {
+            background: #1e293b; color: #38bdf8; border: 2px solid #475569;
+            padding: 5px 10px; border-radius: 6px; font-size: 0.95em; font-weight: bold;
+            outline: none; transition: 0.2s; width: 140px; text-align: center;
+        }
+        .gap-inp:focus { border-color: #38bdf8; background: #0f172a; }
+        .gap-inp.correct { border-color: var(--success); color: #4ade80; background: #022c22; }
+        .gap-inp.wrong { border-color: var(--danger); color: #f87171; background: #450a0a; }
+
+        .fb-msg { font-size: 0.82em; margin-top: 6px; font-style: italic; display: none; }
+        .fb-msg.show { display: block; }
+        .fb-msg.correct { color: #4ade80; }
+        .fb-msg.wrong { color: #fbbf24; }
+
+        /* Zijpaneel met YouTube Video & Fatbike */
+        .grammatica-side-box {
+            flex: 1; background: #1e293b; border-radius: 12px; border: 1px solid #334155;
+            display: flex; flex-direction: column; padding: 18px; align-items: center; text-align: center;
+            overflow-y: auto; gap: 14px;
+        }
+        .chase-video {
+            width: 100%; height: 260px; border-radius: 10px;
+            border: 2px solid #38bdf8; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .onderschrift-container {
+            background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+            padding: 10px 14px; width: 100%; text-align: center;
+        }
+        .vtt-doorgehaald {
+            text-decoration: line-through;
+            text-decoration-color: #ef4444;
+            text-decoration-thickness: 3px;
+            color: #94a3b8;
+            font-size: 0.85em;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .ovt-handschrift {
+            font-family: 'Caveat', cursive, sans-serif;
+            color: #38bdf8;
+            font-size: 1.35em;
+            font-weight: 700;
+            display: block;
+            letter-spacing: 0.5px;
+        }
+        .meter-container {
+            width: 100%; background: #0f172a; border-radius: 8px; padding: 12px; border: 1px solid #334155;
+        }
+        .meter-bar-bg { width: 100%; height: 16px; background: #334155; border-radius: 8px; overflow: hidden; margin: 8px 0; }
+        #chase-progress { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #10b981); transition: width 0.4s ease; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="verhoor-box">
-        <div class="status-bar">
-            <span>EVI'S MEEDOOGZAAMHEID: <span id="stress-txt">HOOG</span></span>
-            <span id="timer">00:00</span>
-        </div>
-        <div id="stress-meter"></div>
-        <div id="messages">
-            <div class="bubble evi"><b>Evi:</b> Goedendag agent. Ik ben Evi de Vries (04-11-2002). Ik kom aangifte doen van de diefstal van mijn witte Gazelle Esprit... kunt u de details noteren?</div>
-        </div>
-        <div style="padding:15px; background:white; display:flex; gap:10px;">
-            <input type="text" id="chatInp" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:6px;" placeholder="Stel je vraag..." onkeypress="if(event.key==='Enter') verhoor()">
-            <button onclick="verhoor()" style="padding:10px 20px; background:var(--police); color:white; border:none; border-radius:6px; cursor:pointer;">VRAAG</button>
-        </div>
+<!-- Bovenste Navigatie en Casus Selector -->
+<div class="tab-nav">
+    <div class="tab-btn-group">
+        <button class="tab-btn active" data-tab="tab-aangifte" onclick="switchTab('tab-aangifte')">
+            📋 1. Verhoor & Aangifte
+        </button>
+        <button class="tab-btn" data-tab="tab-quizlet" onclick="switchTab('tab-quizlet')">
+            🎮 2. Quizlet Live Afsluiting
+        </button>
+        <button class="tab-btn" data-tab="tab-grammatica" onclick="switchTab('tab-grammatica')">
+            ✍️ 3. Grammatica Justitie (VTT ➔ OVT)
+        </button>
     </div>
 
-    <div class="analyse-box">
-        <div class="dashboard" id="dash">
+    <div class="casus-badge">
+        <span>Actieve Casus:</span>
+        <select id="casusSelect" class="casus-select" onchange="wisselCasus(parseInt(this.value))">
+            <option value="0">1. Evi de Vries (Fietsdiefstal)</option>
+            <option value="1">2. Evert Pot (Winkeldiefstal AH)</option>
+            <option value="2">3. Lisa Lood (Betasting straat)</option>
+            <option value="3">4. Lodewijk van der Ee (Babbeltruc)</option>
+        </select>
+    </div>
+</div>
+
+<!-- Tab 1: Verhoor en Aangifte -->
+<div id="tab-aangifte" class="tab-content active">
+    <div class="app-container">
+        <div class="verhoor-box">
+            <div class="status-bar">
+                <span>MEEDOOGZAAMHEID: <span id="stress-txt">HOOG</span></span>
+                <span id="timer">00:00</span>
             </div>
-        <div class="editor">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <h3 style="margin:0;">Proces-Verbaal van Aangifte</h3>
-                <b id="score-val" style="color:var(--success)">VOLTOOID: 0%</b>
+            <div id="stress-meter"></div>
+            <div id="messages"></div>
+            <div style="padding:15px; background:white; display:flex; gap:10px;">
+                <input type="text" id="chatInp" style="flex:1; padding:12px; border:1px solid #ccc; border-radius:6px;" placeholder="Stel je vraag aan de aangever..." onkeypress="if(event.key==='Enter') verhoor()">
+                <button id="sendBtn" onclick="verhoor()" style="padding:10px 20px; background:var(--police); color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">VRAAG</button>
             </div>
-            <textarea id="pvEditor" oninput="analyseerTekst()" placeholder="Begin hier met het officieel verslag..."></textarea>
+        </div>
+
+        <div class="analyse-box">
+            <div class="dashboard" id="dash"></div>
+            <div class="editor">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <h3 style="margin:0; font-size:1em;">Proces-Verbaal van Aangifte</h3>
+                    <b id="score-val" style="color:var(--success)">VOLTOOID: 0%</b>
+                </div>
+                <textarea id="pvEditor" oninput="analyseerTekst()" placeholder="Begin hier met het officieel verslag..."></textarea>
+                
+                <div id="hint-box" style="margin-top:6px; color:#64748b; font-size:0.82em; font-style:italic;">
+                    Tip: Noteer eerst de personalia en de toedracht.
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-save" onclick="opslaan()">INDIENEN BIJ OFFICIER</button>
+                    <button class="btn-reset" onclick="resetPV()" title="Verwijdert alle ingeleverde dossiers uit de database en wist het scherm">🗑️ Reset Alles (Wis Database)</button>
+                </div>
+
+                <!-- Realtime Livefeed van ingeleverde teksten van klasgenoten -->
+                <div class="livefeed-box">
+                    <div class="livefeed-header">
+                        <span>📡 Livefeed ingeleverde dossiers (alle studenten):</span>
+                        <span id="feed-count" style="color:#2563eb;">0 ingeleverd</span>
+                    </div>
+                    <div class="livefeed-items" id="liveFeedList">
+                        <div style="color:#94a3b8; font-size:0.75em; font-style:italic;">Nog geen aangiftes ingediend.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab 2: Quizlet Embed -->
+<div id="tab-quizlet" class="tab-content">
+    <div class="quizlet-container">
+        <div class="quizlet-header">
+            <span style="font-size: 0.9em; font-weight: bold; color: #94a3b8;">
+                🎯 Quizlet Live Evaluatie
+            </span>
+            <a href="https://quizlet.com/1234608313/live?type=classic" target="_blank" rel="noopener noreferrer" class="btn-external">
+                Open in nieuw tabblad ↗
+            </a>
+        </div>
+        <iframe 
+            class="quizlet-frame" 
+            src="https://quizlet.com/1234608313/live?type=classic" 
+            allow="fullscreen; autoplay">
+        </iframe>
+    </div>
+</div>
+
+<!-- Tab 3: Grammatica Justitie (VTT -> OVT) -->
+<div id="tab-grammatica" class="tab-content">
+    <div class="grammatica-container">
+        <!-- Lijst met 26 zinnen -->
+        <div class="grammatica-list-box">
+            <div class="grammatica-header">
+                <div>
+                    <b style="color:#f8fafc; font-size:1.05em;">⚖️ Justitiële Zinsontleding & Werkwoordsvormen</b>
+                    <div style="font-size:0.82em; color:#94a3b8;">Zet het werkwoord van de Voltooid Tegenwoordige Tijd (VTT) om naar de Onvoltooid Verleden Tijd (OVT).</div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button onclick="controleerAlleZinnen()" style="background:#2563eb; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                        Controleer Alles
+                    </button>
+                    <button onclick="resetGrammatica()" style="background:#475569; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;" title="Wist alle ingevulde antwoorden">
+                        🔄 Reset Zinnen
+                    </button>
+                </div>
+            </div>
+            <div class="grammatica-scroll" id="grammaticaList"></div>
+        </div>
+
+        <!-- Rechterkolom: Jan-Willem & Fatbike achtervolging YouTube Video -->
+        <div class="grammatica-side-box">
+            <h3 style="margin:0; color:#38bdf8;">🚨 Politie vs. Fatbike</h3>
             
-            <div id="hint-box" style="margin-top:10px; color:#64748b; font-size:0.85em; font-style:italic;">
-                Tip: Noteer eerst de personalia van Evi de Vries.
+            <iframe 
+                class="chase-video" 
+                src="https://www.youtube.com/embed/lD4UqbZh7dA" 
+                title="Politie Amsterdam Nieuw-West - Achtervolging fatbike" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+
+            <div class="onderschrift-container">
+                <span class="vtt-doorgehaald">"Hoeveel meter heeft Jan-Willem ingelopen op de fatbike?"</span>
+                <span class="ovt-handschrift">'Hoeveel meter liep Jan-Willem in op de fatbike?'</span>
             </div>
 
-            <button class="btn-save" onclick="opslaan()">INDIENEN BIJ OFFICIER</button>
+            <div class="meter-container">
+                <div style="display:flex; justify-content:space-between; font-size:0.85em; font-weight:bold;">
+                    <span>Afstand ingelopen:</span>
+                    <span id="chase-score" style="color:#38bdf8;">0 / 26 zinnen</span>
+                </div>
+                <div class="meter-bar-bg">
+                    <div id="chase-progress"></div>
+                </div>
+                <div id="chase-status" style="font-size:0.8em; color:#94a3b8; margin-top:4px;">
+                    De fatbike rijdt nog 45 km/u over het trottoir... Los de zinnen op!
+                </div>
+            </div>
+
+            <div style="background:#0f172a; padding:12px; border-radius:8px; border:1px solid #334155; width:100%; font-size:0.8em; text-align:left; color:#94a3b8;">
+                <b style="color:#f8fafc;">💡 Snelle PV-Vuistregels:</b><br>
+                • <b>'t Kofschip X:</b> Eindigt de stam op t, k, f, s, ch, p of x? Dan +te(n). Anders +de(n).<br>
+                • <b>Sterke werkwoorden:</b> Veranderen van klank (bijv. <i>wijzen ➔ wees</i>, <i>breken ➔ brak</i>).<br>
+                • <b>Dubbel-d / Dubbel-t:</b> Stam op d/t krijgt in de OVT altijd nog -de(n) of -te(n) erbij (bijv. <i>leiden ➔ leidde</i>, <i>pleiten ➔ pleitte</i>).
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- FIREBASE & DATA ---
+    // --- GROQ API CONFIGURATIE ---
+    const GROQ_API_KEY = "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";
+    const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+    // --- FIREBASE CONFIGURATIE ---
     const firebaseConfig = { apiKey: "AIzaSyC-Of0AUOd-kVo2RKxYc-68Gr-RO4HdRk0", authDomain: "q2aangifteles2.firebaseapp.com", databaseURL: "https://q2aangifteles2-default-rtdb.europe-west1.firebasedatabase.app", projectId: "q2aangifteles2" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const criteria = [
-        { id: 'c1', l: 'NAAM', w: ['evi', 'vries'], t: 'Naam: Evi de Vries' },
-        { id: 'c2', l: 'GEB.DATUM', w: ['4 november', '2002'], t: 'Geboren: 04-11-2002' },
-        { id: 'c3', l: 'MERK', w: ['gazelle', 'esprit'], t: 'Merk/Type: Gazelle Esprit' },
-        { id: 'c4', l: 'KLEUR', w: ['wit', 'witte'], t: 'Kleur: Wit' },
-        { id: 'c5', l: 'LOCATIE', w: ['vredenburg', '24'], t: 'Plaats: Vredenburg 24-B' },
-        { id: 'c6', l: 'TIJD', w: ['3 uur', 'nacht'], t: 'Tijdstip: ca. 03:00' },
-        { id: 'c7', l: 'SLOT', w: ['cijferslot', 'doorgeknipt'], t: 'Beveiliging: Doorgeknipt' },
-        { id: 'c8', l: 'TOESTEMMING', w: ['geen toestemming'], t: 'Geen toestemming verleend' },
-        { id: 'c9', l: 'WAARDE', w: ['650'], t: 'Dagwaarde: € 650,-' },
-        { id: 'c10', l: 'STAD', w: ['utrecht'], t: 'Woonplaats: Utrecht' }
+    // --- DEFINITIE VAN DE 4 CASUSSEN ---
+    const casussen = [
+        {
+            id: 0,
+            naam: "Evi de Vries",
+            intro: "Goedendag agent. Ik ben Evi de Vries (04-11-2002). Ik kom aangifte doen van de diefstal van mijn witte Gazelle Esprit fiets... kunt u mij alstublieft helpen?",
+            systemPrompt: `Je bent Evi de Vries (geboren 04-11-2002, 22 jaar, woont Vredenburg 24-B in Utrecht). Je doet aangifte van diefstal van je witte Gazelle Esprit damesfiets (dagwaarde € 650,-). 
+OMGEVING (EXTERIEUR): Het delict vond plaats 's nachts rond 03:00 uur aan de Vredenburg in Utrecht. Buiten op straat: donker, natte glimmende klinkers, flikkerende straatlantaarns, stapels terrasstoelen met sloten tegen cafégevels, kille nachtlucht, en je kapotgeknipte cijferslot lag op straat.
+SIGNALEMENT DADER:
+- Geslacht: Man.
+- Postuur & Lengte: ca. 1.85m lang, normaal tot licht gezet postuur.
+- Kleding: Donkerblauwe gewatteerde jas (parka) met capuchon, zwarte spijkerbroek, donkere schoenen.
+- VORM VAN HET HOOFD: Een langwerpig, smal en hoekig gezicht met een scherpe, strakke kaaklijn.
+- BAARD: Een lange, ruige volle baard (houthakkersbaard) van zeker 5 à 6 centimeter lang, ruig en ongekamd, kastanjebruin met een wat rossige gloed. (Geen getrimde ringbaard!).
+GEDRAGSREGELS:
+- Reageer vloeiend, menselijk, realistisch en emotioneel als een studente die net haar fiets kwijt is.
+- GEEF TE ALLEN TIJDE ANTWOORD op vragen van de politie. Weiger nooit te antwoorden.
+- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Gebruik nooit exact dezelfde zinnen. Varieer in formulering, perspectief en details.`,
+            criteria: [
+                { id: 'c1', l: 'NAAM', w: ['evi', 'vries'], t: 'Naam: Evi de Vries' },
+                { id: 'c2', l: 'GEB.DATUM', w: ['4 november', '2002', '04-11'], t: 'Geboren: 04-11-2002' },
+                { id: 'c3', l: 'MERK/TYPE', w: ['gazelle', 'esprit'], t: 'Merk: Gazelle Esprit (wit)' },
+                { id: 'c4', l: 'LOCATIE', w: ['vredenburg', '24'], t: 'Plaats: Vredenburg 24-B, Utrecht' },
+                { id: 'c5', l: 'EXTERIEUR', w: ['klinker', 'horeca', 'lantaarn', 'terras', 'nacht', 'donker'], t: 'Omgeving: Vredenburg exterieur' },
+                { id: 'c6', l: 'POSTUUR', w: ['1.85', '185', 'gezet', 'normaal'], t: 'Postuur: 1.85m, normaal/gezet' },
+                { id: 'c7', l: 'KLEDING', w: ['donkerblauw', 'parka', 'jas', 'spijkerbroek', 'blauw'], t: 'Kleding: Donkerblauwe parka/jas' },
+                { id: 'c8', l: 'HOOFDVORM', w: ['langwerpig', 'hoekig', 'smal', 'kaaklijn'], t: 'Hoofd: Langwerpig, hoekige kaak' },
+                { id: 'c9', l: 'BAARD', w: ['houthakker', 'ruig', 'lang', 'volle baard'], t: 'Baard: Lange, ruige volle baard' },
+                { id: 'c10', l: 'BEVEILIGING', w: ['cijferslot', 'geen toestemming', '650'], t: 'Slot kapot, geen toestemming' }
+            ]
+        },
+        {
+            id: 1,
+            naam: "Evert Pot",
+            intro: "Goedemiddag agent, ik ben Evert Pot, filiaalmanager van de Albert Heijn aan de Leusderweg in Amersfoort. Ik kom aangifte doen van een brutale winkeldiefstal die ik zojuist op onze camera's heb vastgelegd.",
+            systemPrompt: `Je bent Evert Pot (geboren 18-05-1976, 48 jaar, filiaalmanager van de Albert Heijn aan de Leusderweg in Amersfoort). 
+FEIT: Diefstal van een fles Andrélon shampoo (€ 4,79) door een man die deze in de binnenzak van zijn jas stopte en wegliep zonder te betalen.
+OMGEVING (INTERIEUR): Albert Heijn filiaal Leusderweg. Drukke winkel, fel wit TL-licht, piepende zelfscankassa's, winkelwagentjes. Het gebeurde in pad 4: de rij persoonlijke verzorgingsmiddelen en shampoo, direct gelegen naast het gangpad van de chips en borrelnootjes. Er hangt een mengeling van zoete shampoogeur en paprikachips.
+SIGNALEMENT DADER:
+- Geslacht: Man.
+- Postuur & Lengte: ca. 1.85m lang, normaal tot licht gezet postuur.
+- Kleding: Donkerblauwe gewatteerde jas (parka) met capuchon, zwarte spijkerbroek, grijze sneakers.
+- VORM VAN HET HOOFD: Een opvallend rond tot ovaal gezicht met volle wangen.
+- BAARD: Een strak getrimde ringbaard (goatee rond de mond en kin) van ongeveer 1 centimeter lang. Zeer verzorgd en strak afgelijnd; de wangen en de hals zijn spekglad geschoren. Donkerbruine baardharen met enkele grijze haartjes.
+GEDRAGSREGELS:
+- Spreek kordaat, zakelijk, professioneel en duidelijk als een ervaren winkelmanager.
+- GEEF TE ALLEN TIJDE ANTWOORD op vragen van de politie.
+- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Herhaal nooit dezelfde zinnen; geef telkens nieuwe observaties van de camerabeelden en de winkelvloer.`,
+            criteria: [
+                { id: 'c1', l: 'NAAM', w: ['evert', 'pot'], t: 'Aangever: Evert Pot' },
+                { id: 'c2', l: 'FUNCTIE', w: ['filiaalmanager', 'manager', 'albert heijn', 'ah'], t: 'Functie: Filiaalmanager AH' },
+                { id: 'c3', l: 'LOCATIE', w: ['leusderweg', 'amersfoort'], t: 'Plaats: Leusderweg, Amersfoort' },
+                { id: 'c4', l: 'INTERIEUR', w: ['verzorging', 'shampoo', 'chips', 'borrelnoot', 'pad', 'gangpad'], t: 'Interieur: Verzorgingspad naast chips' },
+                { id: 'c5', l: 'BUIT', w: ['andrélon', 'andrelon', 'shampoo', 'fles'], t: 'Buit: Fles Andrélon shampoo' },
+                { id: 'c6', l: 'POSTUUR', w: ['1.85', '185', 'gezet', 'normaal'], t: 'Postuur: 1.85m, normaal/gezet' },
+                { id: 'c7', l: 'KLEDING', w: ['donkerblauw', 'blauw', 'parka', 'jas', 'spijkerbroek'], t: 'Kleding: Donkerblauwe parka/jas' },
+                { id: 'c8', l: 'HOOFDVORM', w: ['rond', 'ovaal', 'wangen'], t: 'Hoofd: Rond / ovaal gezicht' },
+                { id: 'c9', l: 'BAARD', w: ['ringbaard', 'goatee', 'getrimd', 'strak'], t: 'Baard: Strakke korte ringbaard' },
+                { id: 'c10', l: 'BEWIJS', w: ['camera', 'binnenzak', 'geen toestemming'], t: 'Binnenzak / camerabeelden' }
+            ]
+        },
+        {
+            id: 2,
+            naam: "Lisa Lood",
+            intro: "Hallo agent... ik tril er nog helemaal van. Ik ben Lisa Lood (geboren 14-09-1997). Ik ben zojuist onderweg naar huis op straat plotseling aangerand en onzedelijk betast...",
+            systemPrompt: `Je bent Lisa Lood (geboren 14-09-1997, 27 jaar, woont Singelstraat 12 in Utrecht). Je bent zojuist slachtoffer geworden van een onzedelijke betasting op straat. Een man greep je vast en betastte je borsten en billen over je kleding heen.
+OMGEVING (EXTERIEUR): Het gebeurde rond 22:45 uur op het wandelpad in het Zocherpark nabij de Singel. Het was aardedonker tussen de hoge bomen, nat asfalt na een regenbui, de geur van natte herfstbladeren, een flauwe oranje straatlantaarn in de verte en het zachte gezoem van een transformatorkast.
+SIGNALEMENT DADER:
+- Geslacht: Man.
+- Postuur & Lengte: ca. 1.75m lang, opvallend slank en tenger gebouwd.
+- Kleding: Olijfgroen bomberjack, lichtgrijze joggingbroek, witte sportschoenen.
+- VORM VAN HET HOOFD: Een hartvormig gezicht met hoge, brede jukbeenderen en een smalle, puntige kin.
+- BAARD: Een lichte, vlassige drie-dagen-stoppelbaard van enkele millimeters over zijn kaak en wangen. Blond tot lichtrossige stoppels, nauwelijks een snor.
+GEDRAGSREGELS:
+- Je bent geschrokken en emotioneel, maar wil dolgraag dat de politie deze viezerik arresteert.
+- GEEF TE ALLEN TIJDE ANTWOORD op elke vraag van de verhoorder.
+- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Breng telkens nuances, zintuiglijke details of emoties naar voren zonder jezelf te herhalen.`,
+            criteria: [
+                { id: 'c1', l: 'NAAM', w: ['lisa', 'lood'], t: 'Naam: Lisa Lood' },
+                { id: 'c2', l: 'GEB.DATUM', w: ['1997', '14 september', '27 jaar'], t: 'Geboren: 14-09-1997' },
+                { id: 'c3', l: 'LOCATIE', w: ['singel', 'zocherpark', 'singelstraat'], t: 'Plaats: Zocherpark / Singel' },
+                { id: 'c4', l: 'EXTERIEUR', w: ['regen', 'asfalt', 'bomen', 'bladeren', 'donker', 'lantaarn'], t: 'Omgeving: Donker park, nat asfalt' },
+                { id: 'c5', l: 'DELICT', w: ['betast', 'aanranding', 'onzedelijk', 'borst', 'billen'], t: 'Feit: Onzedelijke betasting' },
+                { id: 'c6', l: 'POSTUUR', w: ['1.75', '175', 'slank', 'tenger'], t: 'Postuur: 1.75m, slank/tenger' },
+                { id: 'c7', l: 'KLEDING', w: ['olijfgroen', 'groen', 'bomberjack', 'joggingbroek', 'grijs'], t: 'Kleding: Groen bomberjack, grijze broek' },
+                { id: 'c8', l: 'HOOFDVORM', w: ['hartvormig', 'spits', 'kin', 'jukbeenderen'], t: 'Hoofd: Hartvormig met spitse kin' },
+                { id: 'c9', l: 'BAARD', w: ['stoppel', 'stoppelbaard', 'drie dagen', 'driedagenbaard', 'vlas'], t: 'Baard: Drie-dagen stoppelbaard' },
+                { id: 'c10', l: 'TIJDSTIP', w: ['22:45', 'avond', 'geen toestemming'], t: 'Tijdstip ca. 22:45 / Geen toestemming' }
+            ]
+        },
+        {
+            id: 3,
+            naam: "Lodewijk van der Ee",
+            intro: "Dag agent... neem me niet kwalijk dat ik zo van slag ben. Ik ben Lodewijk van der Ee, 81 jaar oud (03-02-1943). Er heeft zojuist een brutale oplichter aan mijn voordeur gestaan die mij met een smoes bestolen heeft.",
+            systemPrompt: `Je bent Lodewijk van der Ee (geboren 03-02-1943, 81 jaar, weduwnaar, woont Parklaan 88-A in Amersfoort). 
+FEIT: Oplichting / babbeltruc aan de voordeur. Een jongeman deed zich voor als controleur van de waterleiding en bank, en heeft met een babbeltruc jouw portemonnee met € 350,- contant geld en je pinpas ontfutseld.
+OMGEVING (INTERIEUR): Jouw seniorenappartement aan de Parklaan. In de gang bij de voordeur: klassiek groen-geel bloemetjesbehang, zacht hoogpolig tapijt, de geur van filterkoffie en lavendelzeep, een donker eikenhouten kapstok met je regenjas, en de houten voordeur met een zware koperen kierstandhouder/ketting.
+SIGNALEMENT DADER:
+- Geslacht: Man.
+- Postuur & Lengte: ca. 1.75m lang, opvallend slank en tenger gebouwd.
+- Kleding: Olijfgroen jack (bomberjack), lichte grijze broek, witte sportschoenen.
+- VORM VAN HET HOOFD: Een vierkant, blokvormig hoofd met een brede, platte kaaklijn en een stompe kin.
+- BAARD: Een uiterst precies gestyled klein sikje op de punt van de kin (soul patch / chin puff) gecombineerd met een smal potloodsnorretje (pencil moustache). Ravenzwart haar. Zijn wangen en kaakhoeken waren volkomen gladgeschoren.
+GEDRAGSREGELS:
+- Spreek als een beleefde, wat oudere heer van stand ("meneer de agent", netjes geformuleerd, aangedaan door het verlies van vertrouwen).
+- GEEF TE ALLEN TIJDE ANTWOORD op elke vraag.
+- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Gebruik telkens andere bewoordingen en noem details van de woning of het gesprek aan de deur.`,
+            criteria: [
+                { id: 'c1', l: 'NAAM', w: ['lodewijk', 'van der ee', 'ee'], t: 'Naam: Lodewijk van der Ee' },
+                { id: 'c2', l: 'GEB.DATUM', w: ['1943', '3 februari', '81 jaar', 'bejaard'], t: 'Geboren: 03-02-1943' },
+                { id: 'c3', l: 'LOCATIE', w: ['parklaan', 'amersfoort'], t: 'Plaats: Parklaan, Amersfoort' },
+                { id: 'c4', l: 'INTERIEUR', w: ['bloemetjesbehang', 'kapstok', 'gang', 'koffie', 'voordeur', 'ketting'], t: 'Interieur: Gang met bloemetjesbehang' },
+                { id: 'c5', l: 'DELICT', w: ['babbeltruc', 'oplichting', 'babbel', 'watermeter', 'bankmedewerker'], t: 'Feit: Babbeltruc / oplichting' },
+                { id: 'c6', l: 'POSTUUR', w: ['1.75', '175', 'slank', 'tenger'], t: 'Postuur: 1.75m, slank/tenger' },
+                { id: 'c7', l: 'KLEDING', w: ['olijfgroen', 'groen', 'jack', 'bomberjack', 'grijze broek'], t: 'Kleding: Groen jack, grijze broek' },
+                { id: 'c8', l: 'HOOFDVORM', w: ['vierkant', 'blokvormig', 'brede kaak', 'plat'], t: 'Hoofd: Vierkant, blokvormig' },
+                { id: 'c9', l: 'BAARD', w: ['sik', 'sikje', 'potloodsnor', 'snorretje', 'gladde wangen'], t: 'Baard: Sikje met potloodsnorretje' },
+                { id: 'c10', l: 'SCHADE', w: ['350', 'pinpas', 'portemonnee', 'geen toestemming'], t: 'Buit: € 350,- en pinpas' }
+            ]
+        }
     ];
 
+    // --- 26 GRAMMATICA ZINNEN (VTT -> OVT) OVER JUSTITIE (INCLUSIEF 'MATCHFIXEN') ---
+    const grammaticaData = [
+        {
+            vtt: "De officier van justitie heeft vier jaar onvoorwaardelijke gevangenisstraf geëist.",
+            voor: "De officier van justitie",
+            werkwoord: "eisen",
+            na: "vier jaar onvoorwaardelijke gevangenisstraf.",
+            target: "eiste",
+            tip: "De stam van 'eisen' is 'eis' (eindigt op een 's'). De 's' zit in 't Kofschip X, dus stam + te = eiste.",
+            compliment: "Uitstekend! 't Kofschip X feilloos toegepast."
+        },
+        {
+            vtt: "De rechercheur heeft de getuige urenlang op het politiebureau verhoord.",
+            voor: "De rechercheur",
+            werkwoord: "verhoren",
+            na: "de getuige urenlang op het politiebureau.",
+            target: "verhoorde",
+            tip: "De stam van 'verhoren' is 'verhoor' (eindigt op een 'r'). De 'r' zit niet in 't Kofschip X, dus: stam + de = verhoorde.",
+            compliment: "Top! Correcte verleden tijd van een zwak werkwoord."
+        },
+        {
+            vtt: "De agenten hebben de verdachte op heterdaad betrapt.",
+            voor: "De agenten",
+            werkwoord: "betrappen",
+            na: "de verdachte op heterdaad.",
+            target: "betrapten",
+            tip: "Let op: het onderwerp 'de agenten' is meervoud! Stam (betrap) + ten = betrapten.",
+            compliment: "Scherp gezien! Meervoudsvorm met -ten klopt als een bus."
+        },
+        {
+            vtt: "De rechter heeft het verzoek van de advocaat afgewezen.",
+            voor: "De rechter",
+            werkwoord: "afwijzen",
+            na: "het verzoek van de advocaat af.",
+            target: "wees",
+            tip: "'Afwijzen' is een sterk werkwoord: wijzen - wees - gewezen. Enkelvoud OVT is 'wees'.",
+            compliment: "Prachtig! Sterke werkwoorden vormen voor jou geen beletsel."
+        },
+        {
+            vtt: "De verdachte heeft de zware beschuldigingen stellig ontkend.",
+            voor: "De verdachte",
+            werkwoord: "ontkennen",
+            na: "de zware beschuldigingen stellig.",
+            target: "ontkende",
+            tip: "De stam van 'ontkennen' is 'ontken'. De 'n' zit niet in 't Kofschip X, dus ontken + de = ontkende.",
+            compliment: "Spot on! Geen speld tussen te krijgen."
+        },
+        {
+            vtt: "De getuige heeft een zeer gedetailleerde verklaring afgelegd.",
+            voor: "De getuige",
+            werkwoord: "afleggen",
+            na: "een zeer gedetailleerde verklaring af.",
+            target: "legde",
+            tip: "Stam van 'leggen' is 'leg' (eindigt op 'g'). De 'g' zit niet in 't Kofschip X, dus enkelvoud OVT is 'legde'.",
+            compliment: "Geweldig! Een proces-verbaalwaardige vervoeging."
+        },
+        {
+            vtt: "De politie heeft de vluchtende auto succesvol klemgereden.",
+            voor: "De politie",
+            werkwoord: "klemrijden",
+            na: "de vluchtende auto succesvol klem.",
+            target: "reed",
+            tip: "'Rijden' is een sterk werkwoord (rijden - reed - gereden). Enkelvoud is 'reed' (met een d).",
+            compliment: "Keurig! 'Reed' met een d, precies zoals het hoort."
+        },
+        {
+            vtt: "De forensisch experts hebben de vingerafdrukken veiliggesteld.",
+            voor: "De forensisch experts",
+            werkwoord: "veiligstellen",
+            na: "de vingerafdrukken veilig.",
+            target: "stelden",
+            tip: "Meervoud! Onderwerp is 'de forensisch experts'. Stam is 'stel' (l zit niet in 't Kofschip X) + den = stelden.",
+            compliment: "Heel goed! Het sporenonderzoek is grammaticaal waterdicht."
+        },
+        {
+            vtt: "De advocaat heeft vurig voor de vrijspraak van zijn cliënt gepleit.",
+            voor: "De advocaat",
+            werkwoord: "pleiten",
+            na: "vurig voor de vrijspraak van zijn cliënt.",
+            target: "pleitte",
+            tip: "De stam van 'pleiten' is 'pleit' (eindigt op 't'). De 't' zit in 't Kofschip X, dus pleit + te = pleitte (dubbel -tt-!).",
+            compliment: "Briljant! De dubbele 't' bij stammen op een -t heb je perfect door."
+        },
+        {
+            vtt: "De jongeren zijn met hun opgevoerde fatbike voor de politie gevlucht.",
+            voor: "De jongeren",
+            werkwoord: "vluchten",
+            na: "met hun opgevoerde fatbike voor de politie.",
+            target: "vluchtten",
+            tip: "Let op de dubbele 't'! Stam is 'vlucht', onderwerp is meervoud, dus vlucht + ten = vluchtten.",
+            compliment: "Chapeau! Jan-Willem kon ze net niet bijhouden, maar jouw spelling wel!"
+        },
+        {
+            vtt: "De hoofdinspecteur heeft het grootschalige moordonderzoek geleid.",
+            voor: "De hoofdinspecteur",
+            werkwoord: "leiden",
+            na: "het grootschalige moordonderzoek.",
+            target: "leidde",
+            tip: "Pas op voor de valkuil: de stam van 'leiden' is 'leid'. Stam + de = leidde (dubbel -dd-!).",
+            compliment: "Meesterlijk! Niet getwijfeld over de dubbele 'd'."
+        },
+        {
+            vtt: "Het arrestatieteam is het zwaarbeveiligde pand binnengevallen.",
+            voor: "Het arrestatieteam",
+            werkwoord: "binnenvallen",
+            na: "het zwaarbeveiligde pand binnen.",
+            target: "viel",
+            tip: "'Vallen' is een sterk werkwoord: vallen - viel - gevallen. Enkelvoud is 'viel'.",
+            compliment: "Treffer! Snelle actie en de juiste sterke werkwoordsvorm."
+        },
+        {
+            vtt: "De getuigen hebben het kenteken van de verdachte wagen onthouden.",
+            voor: "De getuigen",
+            werkwoord: "onthouden",
+            na: "het kenteken van de verdachte wagen.",
+            target: "onthielden",
+            tip: "'Onthouden' is sterk: onthouden - onthield - onthielden. Het onderwerp is meervoud, dus: onthielden.",
+            compliment: "Uitmuntend! Je geheugen voor sterke meervoudsvormen is vlijmscherp."
+        },
+        {
+            vtt: "De griffier heeft de verklaringen van de verdachte woordelijk genotuleerd.",
+            voor: "De griffier",
+            werkwoord: "notuleren",
+            na: "de verklaringen van de verdachte woordelijk.",
+            target: "notuleerde",
+            tip: "Stam van 'notuleren' is 'notuleer'. De 'r' zit niet in 't Kofschip X, dus notuleer + de = notuleerde.",
+            compliment: "Keurig genotuleerd, collega! Helemaal juist."
+        },
+        {
+            vtt: "De crimineel heeft het zware veiligheidsslot met een koevoet geforceerd.",
+            voor: "De crimineel",
+            werkwoord: "forceren",
+            na: "het zware veiligheidsslot met een koevoet.",
+            target: "forceerde",
+            tip: "Stam van 'forceren' is 'forceer'. De 'r' zit niet in 't Kofschip X, dus voeg -de toe: forceerde.",
+            compliment: "Rake klap! Foutloos vervoegd."
+        },
+        {
+            vtt: "De meldkamer heeft direct twee surveillance-eenheden naar het incident gestuurd.",
+            voor: "De meldkamer",
+            werkwoord: "sturen",
+            na: "direct twee surveillance-eenheden naar het incident.",
+            target: "stuurde",
+            tip: "Stam van 'sturen' is 'stuur'. De 'r' zit niet in 't Kofschip X, dus stam + de = stuurde.",
+            compliment: "Snelle respons en direct de goede vorm!"
+        },
+        {
+            vtt: "De douaneambtenaren hebben een grote partij contrabande ontdekt.",
+            voor: "De douaneambtenaren",
+            werkwoord: "ontdekken",
+            na: "een grote partij contrabande.",
+            target: "ontdekten",
+            tip: "Meervoud! Stam van 'ontdekken' is 'ontdek' (k zit in 't Kofschip X). Meervoud is ontdek + ten = ontdekten.",
+            compliment: "Scherpe waarneming! Meervoud met -ten is correct."
+        },
+        {
+            vtt: "De hacker is geruisloos in de servers van het ministerie ingebroken.",
+            voor: "De hacker",
+            werkwoord: "inbreken",
+            na: "geruisloos in de servers van het ministerie in.",
+            target: "brak",
+            tip: "'Inbreken' is sterk: breken - brak - gebroken. Enkelvoud verleden tijd is 'brak'.",
+            compliment: "Kraakhelder! Je hebt de code van het sterke werkwoord gekraakt."
+        },
+        {
+            vtt: "De hulpofficier van justitie heeft het bevel tot inverzekeringstelling getekend.",
+            voor: "De hulpofficier van justitie",
+            werkwoord: "tekenen",
+            na: "het bevel tot inverzekeringstelling.",
+            target: "tekende",
+            tip: "Stam van 'tekenen' is 'teken'. De 'n' zit niet in 't Kofschip X, dus stam + de = tekende.",
+            compliment: "Ambtshalve goedgekeurd! Helemaal correct."
+        },
+        {
+            vtt: "De buitengewoon opsporingsambtenaren hebben gisteravond diverse bekeuringen uitgedeeld.",
+            voor: "De buitengewoon opsporingsambtenaren",
+            werkwoord: "uitdelen",
+            na: "gisteravond diverse bekeuringen uit.",
+            target: "deelden",
+            tip: "Meervoud van 'uitdelen': stam is 'deel', 'l' zit niet in 't Kofschip X, dus meervoud is deelden.",
+            compliment: "Boete kwijtgescholden wegens vlekkeloze grammatica!"
+        },
+        {
+            vtt: "Het slachtoffer is tijdens het verhoor hevig in tranen uitgebarsten.",
+            voor: "Het slachtoffer",
+            werkwoord: "uitbarsten",
+            na: "tijdens het verhoor hevig in tranen uit.",
+            target: "barstte",
+            tip: "Stam van 'barsten' is 'barst' (eindigt op 't'). De 't' zit in 't Kofschip X, dus barst + te = barstte (dubbel -tt-!).",
+            compliment: "Indrukwekkend! De lastige dubbele -tt- foutloos gespeld."
+        },
+        {
+            vtt: "De meervoudige kamer heeft de verdachte conform de eis veroordeeld.",
+            voor: "De meervoudige kamer",
+            werkwoord: "veroordelen",
+            na: "de verdachte conform de eis.",
+            target: "veroordeelde",
+            tip: "Stam van 'veroordelen' is 'veroordeel' (eindigt op 'l'). De 'l' zit niet in 't Kofschip X, dus: veroordeelde.",
+            compliment: "De rechtbank verklaart uw antwoord unaniem juist!"
+        },
+        {
+            vtt: "De politieagent heeft de verdachte direct bij aanhouding de cautie voorgehouden.",
+            voor: "De politieagent",
+            werkwoord: "voorhouden",
+            na: "de verdachte direct bij aanhouding de cautie voor.",
+            target: "hield",
+            tip: "'Voorhouden' is een sterk werkwoord: houden - hield - gehouden. Enkelvoud is 'hield'.",
+            compliment: "Rechtmatig en vlekkeloos! Cautie correct toegepast."
+        },
+        {
+            vtt: "De getuige heeft de dader op een fotoconfrontatie direct herkend.",
+            voor: "De getuige",
+            werkwoord: "herkennen",
+            na: "de dader op een fotoconfrontatie direct.",
+            target: "herkende",
+            tip: "Stam van 'herkennen' is 'herken'. De 'n' zit niet in 't Kofschip X, dus herken + de = herkende.",
+            compliment: "Honderd procent match! Heel goed."
+        },
+        {
+            vtt: "De wijkagent heeft met succes de rust in de wijk hersteld.",
+            voor: "De wijkagent",
+            werkwoord: "herstellen",
+            na: "met succes de rust in de wijk.",
+            target: "herstelde",
+            tip: "Stam van 'herstellen' is 'herstel' (eindigt op 'l'). De 'l' zit niet in 't Kofschip X, dus stam + de = herstelde.",
+            compliment: "De rust is hersteld en jouw score is bijna compleet!"
+        },
+        {
+            vtt: "De verdachte voetballer heeft de cruciale degradatiewedstrijd opzettelijk gematchfixt.",
+            voor: "De verdachte voetballer",
+            werkwoord: "matchfixen",
+            na: "de cruciale degradatiewedstrijd opzettelijk.",
+            target: "matchfixte",
+            tip: "De stam van 'matchfixen' is 'matchfix' (eindigt op een 'x'). De 'x' zit in 't Kofschip X! Dus stam + te = matchfixte.",
+            compliment: "Geweldig! De 'x' van 't Kofschip X feilloos herkend en toegepast."
+        }
+    ];
+
+    // --- SESSIE & STATUS ---
+    let actieveCasus = null;
+    let chatHistorie = [];
     let stress = 0;
     let questions = 0;
+    let isWaitingForAI = false;
 
-    // --- DASHBOARD SETUP ---
-    const dash = document.getElementById('dash');
-    criteria.forEach(c => {
-        dash.innerHTML += `<div class="point" id="${c.id}">${c.l}<span class="tip">${c.t}</span></div>`;
-    });
+    // --- TAB WISSELEN ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    // --- VERHOOR LOGICA ---
-    function verhoor() {
-        const inp = document.getElementById('chatInp');
-        const box = document.getElementById('messages');
-        if(!inp.value) return;
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+    }
 
-        questions++;
-        stress = Math.min(questions * 10, 100);
+    // --- CASUS INSTELLEN (AD RANDOM OF HANDMATIG) ---
+    function wisselCasus(index) {
+        actieveCasus = casussen[index];
+        document.getElementById('casusSelect').value = index;
+        sessionStorage.setItem('politie_casus_index', index);
+
+        // Reset status
+        stress = 0;
+        questions = 0;
         updateStress();
 
-        box.innerHTML += `<div class="bubble agent">${inp.value}</div>`;
-        const v = inp.value.toLowerCase();
-        inp.value = '';
+        // Chat resetten met de casus introductie
+        chatHistorie = [
+            { role: "system", content: actieveCasus.systemPrompt }
+        ];
 
-        setTimeout(() => {
-            let r = "";
-            if (v.includes("sorry") || v.includes("begrijp") || v.includes("rustig")) {
-                questions = Math.max(0, questions - 3);
-                updateStress();
-                r = "Dank u voor uw begrip. Het is gewoon erg vervelend allemaal.";
-            } else if (stress > 80) {
-                r = "Ik heb dit nu al zo vaak gezegd! Kunt u niet gewoon uw werk doen?";
+        const msgBox = document.getElementById('messages');
+        msgBox.innerHTML = `<div class="bubble evi"><b>${actieveCasus.naam}:</b> ${actieveCasus.intro}</div>`;
+
+        // Dashboard herstellen & opbouwen
+        const dash = document.getElementById('dash');
+        dash.innerHTML = "";
+        actieveCasus.criteria.forEach(c => {
+            dash.innerHTML += `<div class="point" id="${c.id}">${c.l}<span class="tip">${c.t}</span></div>`;
+        });
+
+        analyseerTekst();
+    }
+
+    function initRandomCasus() {
+        let opgeslagen = sessionStorage.getItem('politie_casus_index');
+        let index;
+        if (opgeslagen !== null) {
+            index = parseInt(opgeslagen);
+        } else {
+            index = Math.floor(Math.random() * casussen.length);
+        }
+        wisselCasus(index);
+    }
+
+    // --- VERHOOR VIA GROQ API ---
+    async function verhoor() {
+        const inp = document.getElementById('chatInp');
+        const box = document.getElementById('messages');
+        const sendBtn = document.getElementById('sendBtn');
+        const vraag = inp.value.trim();
+
+        if(!vraag || isWaitingForAI) return;
+
+        questions++;
+        stress = Math.min(questions * 8, 100);
+        updateStress();
+
+        box.innerHTML += `<div class="bubble agent">${vraag}</div>`;
+        inp.value = '';
+        box.scrollTop = box.scrollHeight;
+
+        chatHistorie.push({ role: "user", content: vraag });
+
+        const thinkingId = "thinking-" + Date.now();
+        box.innerHTML += `<div id="${thinkingId}" class="bubble thinking"><b>${actieveCasus.naam}</b> formuleert een antwoord...</div>`;
+        box.scrollTop = box.scrollHeight;
+
+        isWaitingForAI = true;
+        sendBtn.disabled = true;
+
+        try {
+            const stressStatus = stress > 70 ? "ongeduldig/kribbig" : (stress > 40 ? "emotioneel/afwachtend" : "meewerkend");
+            const dynamicSystemPrompt = `${actieveCasus.systemPrompt}
+Huidige emotionele status: ${stressStatus}. Verwerk dit subtiel in je stijl, maar geef ALTIJD een helder antwoord en herhaal jezelf NOOIT letterlijk.`;
+
+            chatHistorie[0].content = dynamicSystemPrompt;
+
+            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${GROQ_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: GROQ_MODEL,
+                    messages: chatHistorie,
+                    temperature: 0.65,
+                    max_tokens: 350
+                })
+            });
+
+            const data = await response.json();
+            const thinkingEl = document.getElementById(thinkingId);
+            if (thinkingEl) thinkingEl.remove();
+
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                const antwoord = data.choices[0].message.content.trim();
+                chatHistorie.push({ role: "assistant", content: antwoord });
+                box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> ${antwoord}</div>`;
             } else {
-                if(v.includes("waar")) r = "Ik woon aan de Vredenburg 24-B in Utrecht.";
-                else if(v.includes("slot")) r = "Het cijferslot lag kapot op straat.";
-                else if(v.includes("waarde")) r = "De fiets was 650 euro waard.";
-                else if(v.includes("toestemming")) r = "Natuurlijk heb ik niemand toestemming gegeven om mijn fiets te lenen!";
-                else r = "Dat heb ik in het begin al verteld, toch? Een witte Gazelle...";
+                box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> Excuus agent, ik begreep u even niet goed. Kunt u dat nogmaals vragen?</div>`;
             }
-            box.innerHTML += `<div class="bubble evi"><b>Evi:</b> ${r}</div>`;
+        } catch (error) {
+            console.error("Groq API Error:", error);
+            const thinkingEl = document.getElementById(thinkingId);
+            if (thinkingEl) thinkingEl.remove();
+            box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> Het schiet me even te binnen: laat me die vraag nog eens rustig beantwoorden...</div>`;
+        } finally {
+            isWaitingForAI = false;
+            sendBtn.disabled = false;
             box.scrollTop = box.scrollHeight;
-        }, 600);
+            inp.focus();
+        }
     }
 
     function updateStress() {
@@ -167,44 +875,216 @@
         const txt = document.getElementById('stress-txt');
         meter.style.width = (100 - stress) + "%";
         if(stress > 70) { meter.style.background = "var(--danger)"; txt.innerText = "KRIBBIG"; }
-        else if(stress > 40) { meter.style.background = "var(--warning)"; txt.innerText = "ONgeduldig"; }
+        else if(stress > 40) { meter.style.background = "var(--warning)"; txt.innerText = "ONGEDULDIG"; }
         else { meter.style.background = "var(--success)"; txt.innerText = "MEEWERKEND"; }
     }
 
     // --- DIEPTE ANALYSE LOGICA ---
     function analyseerTekst() {
+        if(!actieveCasus) return;
         const txt = document.getElementById('pvEditor').value.toLowerCase();
         let score = 0;
         let missing = [];
 
-        criteria.forEach(c => {
+        actieveCasus.criteria.forEach(c => {
             const el = document.getElementById(c.id);
-            if(c.w.some(word => txt.includes(word))) {
-                el.classList.add('met');
-                score++;
-            } else {
-                el.classList.remove('met');
-                missing.push(c.t);
+            if(el) {
+                if(c.w.some(word => txt.includes(word))) {
+                    el.classList.add('met');
+                    score++;
+                } else {
+                    el.classList.remove('met');
+                    missing.push(c.t);
+                }
             }
         });
 
         document.getElementById('score-val').innerText = `VOLTOOID: ${score * 10}%`;
         const hintBox = document.getElementById('hint-box');
         if(score < 10) {
-            hintBox.innerText = "Nog nodig: " + (missing[0] || "...");
+            hintBox.innerText = "Nog nodig in PV: " + (missing[0] || "...");
         } else {
-            hintBox.innerHTML = "<b style='color:var(--success)'>Dossier juridisch compleet!</b>";
+            hintBox.innerHTML = "<b style='color:var(--success)'>Dossier juridisch en feitelijk compleet!</b>";
         }
     }
 
-    // --- TIMER & OPSLAAN ---
-    let s = 0; setInterval(() => { s++; document.getElementById('timer').innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0'); }, 1000);
+    // --- TIMER, OPSLAAN & LIVEFEED ---
+    let s = 0; 
+    setInterval(() => { 
+        s++; 
+        document.getElementById('timer').innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0'); 
+    }, 1000);
+    
     function opslaan() { 
-        const pv = document.getElementById('pvEditor').value;
-        if(pv.length < 50) return alert("PV is te summier.");
-        db.ref('dossiers').push({ tekst: pv, stress_level: stress });
-        alert("Aangifte succesvol verwerkt.");
+        const pv = document.getElementById('pvEditor').value.trim();
+        if(pv.length < 50) return alert("Het Proces-Verbaal is nog te summier (minimaal 50 tekens).");
+        
+        try {
+            // Push naar Firebase Database voor de realtime livefeed
+            db.ref('dossiers').push({ 
+                casus: actieveCasus.naam,
+                tekst: pv.substring(0, 80) + "...", 
+                stress_level: stress,
+                tijdstip: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+            });
+        } catch(e) {
+            console.warn("Offline of Firebase niet bereikbaar:", e);
+        }
+
+        alert("Aangifte succesvol ingediend bij de Officier van Justitie! Je wordt nu doorgeleid naar Quizlet Live.");
+        switchTab('tab-quizlet');
     }
+
+    // Resetknop: wist de VOLLEDIGE database én leegt het scherm
+    function resetPV() {
+        if(confirm("LET OP: Weet je zeker dat je ALLE ingeleverde dossiers uit de database wilt wissen en het scherm wilt resetten?")) {
+            // Verwijdert direct alle opgeslagen dossiers uit Firebase
+            db.ref('dossiers').remove().then(() => {
+                document.getElementById('pvEditor').value = '';
+                analyseerTekst();
+            }).catch(err => {
+                console.error("Fout bij wissen:", err);
+                document.getElementById('pvEditor').value = '';
+                analyseerTekst();
+            });
+        }
+    }
+
+    // Realtime livefeed luisteren via Firebase
+    function activeerLiveFeed() {
+        const feedList = document.getElementById('liveFeedList');
+        const feedCount = document.getElementById('feed-count');
+
+        try {
+            db.ref('dossiers').limitToLast(15).on('value', snapshot => {
+                const data = snapshot.val();
+                if(!data) {
+                    feedList.innerHTML = '<div style="color:#94a3b8; font-size:0.75em; font-style:italic;">Nog geen aangiftes ingediend.</div>';
+                    feedCount.innerText = '0 ingeleverd';
+                    return;
+                }
+                feedList.innerHTML = "";
+                const items = Object.values(data).reverse();
+                feedCount.innerText = `${items.length} ingeleverd`;
+
+                items.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'feed-item';
+                    el.innerHTML = `
+                        <span><b>${item.casus || 'Casus'}:</b> "${item.tekst || ''}"</span>
+                        <span class="feed-badge">✓ ${item.tijdstip || 'Zojuist'}</span>
+                    `;
+                    feedList.appendChild(el);
+                });
+            });
+        } catch(e) {
+            console.warn("Livefeed fout:", e);
+        }
+    }
+
+    // --- GRAMMATICA TABBLAD GENEREREN EN NAKIJK-LOGICA ---
+    function renderGrammaticaOefening() {
+        const container = document.getElementById('grammaticaList');
+        container.innerHTML = "";
+
+        grammaticaData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = "sentence-card";
+            card.id = `card-${index}`;
+
+            card.innerHTML = `
+                <div class="vtt-orig"><b>VTT (${index + 1}):</b> <i>"${item.vtt}"</i></div>
+                <div class="ovt-gap-line">
+                    <span>${item.voor}</span>
+                    <input type="text" class="gap-inp" id="gap-${index}" placeholder="" 
+                           oninput="checkZin(${index})" 
+                           onkeydown="if(event.key==='Enter') checkZin(${index}, true)">
+                    <span style="color:#94a3b8; font-size:0.85em;">(${item.werkwoord})</span>
+                    <span>${item.na}</span>
+                </div>
+                <div class="fb-msg" id="fb-${index}"></div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function checkZin(index, focusNext = false) {
+        const inp = document.getElementById(`gap-${index}`);
+        const card = document.getElementById(`card-${index}`);
+        const fb = document.getElementById(`fb-${index}`);
+        const item = grammaticaData[index];
+        const ingevoerd = inp.value.trim().toLowerCase();
+
+        if (ingevoerd === "") {
+            inp.classList.remove('correct', 'wrong');
+            card.classList.remove('is-correct', 'is-wrong');
+            fb.className = "fb-msg";
+            fb.innerText = "";
+            updateChaseMeter();
+            return;
+        }
+
+        if (ingevoerd === item.target.toLowerCase()) {
+            inp.classList.remove('wrong');
+            inp.classList.add('correct');
+            card.classList.remove('is-wrong');
+            card.classList.add('is-correct');
+            fb.className = "fb-msg show correct";
+            fb.innerHTML = `✅ <b>Compliment:</b> ${item.compliment}`;
+            
+            if (focusNext && index + 1 < grammaticaData.length) {
+                const nextInp = document.getElementById(`gap-${index + 1}`);
+                if (nextInp) nextInp.focus();
+            }
+        } else {
+            inp.classList.remove('correct');
+            inp.classList.add('wrong');
+            card.classList.remove('is-correct');
+            card.classList.add('is-wrong');
+            fb.className = "fb-msg show wrong";
+            fb.innerHTML = `⚠️ <b>Tip:</b> ${item.tip}`;
+        }
+
+        updateChaseMeter();
+    }
+
+    function controleerAlleZinnen() {
+        grammaticaData.forEach((_, i) => checkZin(i));
+    }
+
+    function resetGrammatica() {
+        if(confirm("Wil je alle ingevulde antwoorden van de grammatica-oefening wissen om opnieuw te oefenen?")) {
+            renderGrammaticaOefening();
+            updateChaseMeter();
+        }
+    }
+
+    function updateChaseMeter() {
+        const correctCount = document.querySelectorAll('.gap-inp.correct').length;
+        const total = grammaticaData.length;
+        const perc = Math.round((correctCount / total) * 100);
+
+        document.getElementById('chase-score').innerText = `${correctCount} / ${total} zinnen`;
+        document.getElementById('chase-progress').style.width = perc + "%";
+
+        const statusEl = document.getElementById('chase-status');
+        if (correctCount === total) {
+            statusEl.innerHTML = "<b style='color:#4ade80;'>🎉 Verbluffend! Jan-Willem heeft de fatbike klemgereden en in beslag genomen!</b>";
+        } else if (correctCount > 20) {
+            statusEl.innerText = "De politieauto zit er vlak achter! Nog maar een paar werkwoorden!";
+        } else if (correctCount > 10) {
+            statusEl.innerText = "Achtervolging op volle toeren: Jan-Willem loopt flink in!";
+        } else {
+            statusEl.innerText = "De fatbike scheurt nog rond... Los de zinnen op om in te lopen!";
+        }
+    }
+
+    // Start bij het inladen
+    window.onload = () => {
+        initRandomCasus();
+        renderGrammaticaOefening();
+        activeerLiveFeed();
+    };
 </script>
 </body>
 </html>
