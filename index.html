@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">quizlet
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <title>Politie Academie: Digibord, Verhoor & Grammatica</title>
     
@@ -66,31 +66,38 @@
 
         /* Navigatie Tabbladen */
         .tab-nav {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap;
         }
-        .tab-btn-group { display: flex; gap: 10px; }
+        .tab-btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
         .tab-btn {
             background: #1e293b; color: #94a3b8; border: 1.5px solid #334155;
-            padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 0.95em;
-            cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; gap: 8px;
+            padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.88em;
+            cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; gap: 7px;
         }
         .tab-btn:hover { background: #334155; color: #fff; transform: translateY(-1px); }
         .tab-btn.active { 
             background: linear-gradient(135deg, #1d4ed8, #0284c7); color: #fff; 
             border-color: var(--accent-cyan); box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4); 
         }
+        .tab-badge {
+            background: #0f172a; color: var(--accent-cyan); padding: 2px 7px; border-radius: 999px;
+            font-size: 0.82em; font-weight: 800; border: 1px solid var(--accent-cyan);
+        }
+        .tab-btn.active .tab-badge {
+            background: #fff; color: #1d4ed8; border-color: #fff;
+        }
 
         .meta-badges { display: flex; gap: 10px; align-items: center; }
         .casus-badge {
-            background: #1e293b; color: var(--accent-cyan); padding: 8px 16px; border-radius: 10px;
-            font-size: 0.9em; font-weight: 700; border: 1.5px solid #475569; display: flex; align-items: center; gap: 8px;
+            background: #1e293b; color: var(--accent-cyan); padding: 7px 14px; border-radius: 10px;
+            font-size: 0.88em; font-weight: 700; border: 1.5px solid #475569; display: flex; align-items: center; gap: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         .casus-select {
-            background: #0f172a; color: #f8fafc; border: 1px solid var(--accent-cyan); padding: 5px 10px; border-radius: 6px; font-size: 0.9em; font-weight: 600;
+            background: #0f172a; color: #f8fafc; border: 1px solid var(--accent-cyan); padding: 4px 9px; border-radius: 6px; font-size: 0.9em; font-weight: 600;
         }
 
-        .tab-content { display: none; height: calc(100vh - 75px); }
+        .tab-content { display: none; height: calc(100vh - 78px); }
         .tab-content.active { display: flex; }
 
         /* ==================== TAB 0: DIGIBORD PRO ==================== */
@@ -130,6 +137,7 @@
             background: #f1f5f9; border: 1px solid #cbd5e1; z-index: 10; color: #475569;
         }
         #status.online { background: #dcfce7; color: #15803d; border-color: #86efac; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+        #status.error { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
 
         #trash-zone { 
             position: absolute; top: 12px; left: 16px; width: 60px; height: 60px; 
@@ -141,17 +149,17 @@
 
         /* ==================== AANGIFTE & VERHOOR ==================== */
         .app-container { display: flex; gap: 15px; width: 100%; height: 100%; }
-        .verhoor-box { flex: 1; background: #1e293b; border-radius: 14px; display: flex; flex-direction: column; border: 1.5px solid #334155; }
-        #messages { flex: 1; padding: 16px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; border-radius: 0 0 14px 14px; }
+        .verhoor-box { flex: 1; background: #1e293b; border-radius: 14px; display: flex; flex-direction: column; border: 1.5px solid #334155; min-width: 0; }
+        #messages { flex: 1; padding: 16px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 12px; }
         
-        .analyse-box { flex: 1.6; background: #fff; border-radius: 14px; display: flex; flex-direction: column; color: #1e293b; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+        .analyse-box { flex: 1.6; background: #fff; border-radius: 14px; display: flex; flex-direction: column; color: #1e293b; box-shadow: 0 6px 20px rgba(0,0,0,0.15); min-width: 0; }
         .dashboard { 
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 14px; 
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 12px 14px; 
             background: #f1f5f9; border-bottom: 2px solid #cbd5e1; border-radius: 14px 14px 0 0;
         }
         .point {
-            padding: 12px 6px; background: #fff; border: 1.5px solid #cbd5e1;
-            border-radius: 8px; text-align: center; font-size: 0.78em; font-weight: 800;
+            padding: 10px 6px; background: #fff; border: 1.5px solid #cbd5e1;
+            border-radius: 8px; text-align: center; font-size: 0.76em; font-weight: 800;
             color: #64748b; transition: 0.25s; user-select: none;
         }
         .point.met { background: #dcfce7; border-color: var(--success); color: #166534; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25); }
@@ -159,8 +167,8 @@
         .status-bar { display: flex; justify-content: space-between; padding: 12px 18px; background: linear-gradient(135deg, #1e3a8a, #0284c7); color: white; border-radius: 14px 14px 0 0; font-size: 0.88em; font-weight: 700; }
         #stress-meter { height: 5px; background: var(--success); width: 100%; transition: 0.8s; }
 
-        .editor { flex: 1; padding: 16px 22px; display: flex; flex-direction: column; overflow: hidden; }
-        textarea { flex: 1; min-height: 135px; padding: 14px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 1em; line-height: 1.5; resize: none; outline: none; font-family: var(--font-main); }
+        .editor { flex: 1; padding: 14px 20px; display: flex; flex-direction: column; overflow: hidden; }
+        textarea { flex: 1; min-height: 120px; padding: 14px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 1em; line-height: 1.5; resize: none; outline: none; font-family: var(--font-main); }
         textarea:focus { border-color: var(--police); box-shadow: 0 0 10px rgba(29, 78, 216, 0.15); }
 
         .bubble { padding: 12px 16px; border-radius: 16px; font-size: 0.96em; max-width: 85%; line-height: 1.45; }
@@ -168,19 +176,110 @@
         .agent { align-self: flex-end; background: linear-gradient(135deg, #1d4ed8, #0284c7); color: white; border-bottom-right-radius: 4px; box-shadow: 0 3px 10px rgba(29, 78, 216, 0.2); }
         .thinking { font-style: italic; color: #64748b; background: #e2e8f0; }
 
-        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-save { flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 1em; }
+        .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-save { flex: 1.5; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 14px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 0.96em; }
         .btn-save:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .btn-reset { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: none; padding: 14px 18px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 0.95em; }
+        .btn-save:disabled { opacity: 0.6; cursor: wait; }
+        .btn-clear-local { background: #475569; color: white; border: none; padding: 12px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.88em; }
+        .btn-reset { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border: none; padding: 12px 14px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 0.88em; }
 
         .livefeed-box {
             margin-top: 10px; background: #f8fafc; border: 1.5px solid #cbd5e1;
-            border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; max-height: 95px;
+            border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; max-height: 135px;
         }
-        .livefeed-header { display: flex; justify-content: space-between; font-size: 0.82em; font-weight: 800; color: #334155; margin-bottom: 6px; }
-        .livefeed-items { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; max-height: 60px; }
-        .feed-item { font-size: 0.78em; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-        .feed-badge { background: #dcfce7; color: #15803d; font-weight: 800; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+        .livefeed-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.82em; font-weight: 800; color: #334155; margin-bottom: 6px; gap: 8px; }
+        .livefeed-items { overflow-y: auto; display: flex; flex-direction: column; gap: 5px; max-height: 92px; }
+        .feed-item { 
+            font-size: 0.8em; background: #fff; border: 1px solid #cbd5e1; border-radius: 7px; 
+            padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+            cursor: pointer; transition: 0.15s;
+        }
+        .feed-item:hover { border-color: #2563eb; background: #eff6ff; }
+        .feed-badge { background: #dbeafe; color: #1d4ed8; font-weight: 800; padding: 3px 8px; border-radius: 5px; font-size: 0.85em; white-space: nowrap; }
+        .db-pill { font-size: 0.78em; padding: 2px 8px; border-radius: 999px; font-weight: 800; background: #e2e8f0; color: #475569; }
+        .db-pill.online { background: #dcfce7; color: #15803d; }
+        .db-pill.error { background: #fee2e2; color: #b91c1c; }
+
+        /* ==================== TAB 3: KLAS-DOSSIERS & BEOORDELEN ==================== */
+        .dossiers-container { display: flex; gap: 15px; width: 100%; height: 100%; overflow: hidden; }
+        .dossiers-list-panel {
+            flex: 1; max-width: 420px; background: #1e293b; border-radius: 14px; border: 1.5px solid #334155;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .dossiers-panel-header {
+            padding: 14px 18px; background: #0f172a; border-bottom: 1px solid #334155;
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
+        }
+        .dossiers-scroll { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .dossier-card {
+            background: #0f172a; border: 1.5px solid #334155; border-radius: 10px; padding: 12px 14px;
+            cursor: pointer; transition: 0.2s;
+        }
+        .dossier-card:hover { border-color: var(--accent-cyan); transform: translateY(-1px); }
+        .dossier-card.active { border-color: var(--accent-cyan); background: #0c1f3d; box-shadow: 0 0 14px rgba(56, 189, 248, 0.25); }
+        .dossier-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .dossier-student { font-weight: 800; color: #f8fafc; font-size: 1em; }
+        .dossier-score-pill { background: #dcfce7; color: #166534; font-size: 0.78em; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+        .dossier-meta-line { font-size: 0.82em; color: #94a3b8; margin-bottom: 6px; }
+        .dossier-preview { font-size: 0.86em; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+        .dossier-rating-summary { font-size: 0.82em; color: #fbbf24; font-weight: 700; display: flex; justify-content: space-between; }
+
+        .dossier-detail-panel {
+            flex: 1.8; background: #1e293b; border-radius: 14px; border: 1.5px solid #334155;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .dossier-detail-scroll { flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 16px; }
+        .dossier-empty {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #94a3b8; text-align: center; padding: 30px; gap: 10px;
+        }
+        .dossier-full-box {
+            background: #ffffff; color: #0f172a; border-radius: 12px; padding: 18px 20px;
+            border: 2px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .dossier-full-text {
+            white-space: pre-wrap; line-height: 1.65; font-size: 1.02em; margin-top: 10px;
+            color: #1e293b; font-family: var(--font-main);
+        }
+        .criteria-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .crit-tag { font-size: 0.76em; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: #e2e8f0; color: #64748b; }
+        .crit-tag.met { background: #dcfce7; color: #166534; }
+
+        .review-box {
+            background: #0f172a; border: 1.5px solid #334155; border-radius: 12px; padding: 16px 18px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .star-row { display: flex; align-items: center; gap: 6px; }
+        .star-btn {
+            background: #1e293b; border: 1.5px solid #475569; color: #64748b; font-size: 1.35em;
+            width: 38px; height: 38px; border-radius: 8px; cursor: pointer; transition: 0.15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .star-btn.active { color: #fbbf24; border-color: #fbbf24; background: #78350f33; transform: scale(1.06); }
+        .quick-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .q-tag {
+            background: #1e293b; color: #cbd5e1; border: 1px solid #475569; padding: 5px 10px;
+            border-radius: 999px; font-size: 0.8em; font-weight: 600; cursor: pointer; transition: 0.15s;
+        }
+        .q-tag.active { background: #0284c7; color: #fff; border-color: var(--accent-cyan); }
+        .review-textarea {
+            width: 100%; min-height: 75px; padding: 10px 12px; border-radius: 8px;
+            border: 1.5px solid #475569; background: #1e293b; color: #fff; font-size: 0.95em;
+            font-family: var(--font-main); resize: vertical; outline: none;
+        }
+        .review-textarea:focus { border-color: var(--accent-cyan); }
+        .btn-review-submit {
+            align-self: flex-start; background: linear-gradient(135deg, #2563eb, #0284c7); color: #fff;
+            border: none; padding: 10px 18px; border-radius: 8px; font-weight: 800; cursor: pointer;
+        }
+        .btn-review-submit:hover { filter: brightness(1.1); }
+        .reviews-list { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+        .review-item {
+            background: #1e293b; border: 1px solid #334155; border-radius: 9px; padding: 10px 14px;
+        }
+        .review-item-head { display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; margin-bottom: 4px; }
+        .review-item-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; }
+        .review-tag-pill { background: #0f172a; color: var(--accent-cyan); border: 1px solid #334155; font-size: 0.74em; padding: 2px 7px; border-radius: 5px; }
 
         /* ==================== GRAMMATICA ==================== */
         .grammatica-container { display: flex; gap: 15px; width: 100%; height: 100%; overflow: hidden; }
@@ -223,7 +322,7 @@
         #chase-progress { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #10b981); transition: width 0.4s ease; }
 
         /* ==================== QUIZLET ==================== */
-        .quizlet-container { width: 150%; height: 150%; background: #1e293b; border-radius: 14px; border: 1.5px solid #334155; display: flex; flex-direction: column; overflow: hidden; }
+        .quizlet-container { width: 100%; height: 100%; background: #1e293b; border-radius: 14px; border: 1.5px solid #334155; display: flex; flex-direction: column; overflow: hidden; }
         .quizlet-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: #0f172a; border-bottom: 1px solid #334155; }
         .quizlet-frame { flex: 1; width: 100%; border: none; background: #ffffff; }
         .btn-external { background: linear-gradient(135deg, #2563eb, #0284c7); color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-size: 0.88em; font-weight: 700; }
@@ -253,7 +352,7 @@
         </select>
 
         <label style="display:block; text-align:left; font-size:0.85em; color:var(--accent-cyan); font-weight:bold;">Jouw Naam / Studentnummer:</label>
-        <input type="text" id="loginStudentNaam" placeholder="Bijv. Student Jansen (12345)" />
+        <input type="text" id="loginStudentNaam" placeholder="Bijv. Student Jansen (12345)" onkeypress="if(event.key==='Enter') voltooiLogin()" />
 
         <button onclick="voltooiLogin()">START LES & DIGIBORD ➔</button>
     </div>
@@ -266,13 +365,16 @@
             🖍️ Digibord Pro (Live)
         </button>
         <button class="tab-btn" data-tab="tab-grammatica" onclick="switchTab('tab-grammatica')">
-            ✍️ 1. Grammatica Justitie (VTT ➔ OVT)
+            ✍️ 1. Grammatica (VTT ➔ OVT)
         </button>
         <button class="tab-btn" data-tab="tab-aangifte" onclick="switchTab('tab-aangifte')">
             📋 2. Verhoor & Aangifte
         </button>
+        <button class="tab-btn" data-tab="tab-dossiers" onclick="switchTab('tab-dossiers')">
+            📂 3. Klas-Dossiers & Beoordelen <span id="dossierTabBadge" class="tab-badge">0</span>
+        </button>
         <button class="tab-btn" data-tab="tab-quizlet" onclick="switchTab('tab-quizlet')">
-            🎮 3. Quizlet Live Afsluiting
+            🎮 4. Quizlet Live
         </button>
     </div>
 
@@ -300,8 +402,8 @@
         </div>
 
         <div class="digibord-toolbar">
-            <input type="text" id="wordInput" placeholder="Woord invoeren...">
-            <button id="addBtn" class="digibord-btn add">➕ Toevoegen</button>
+            <input type="text" id="wordInput" placeholder="Woord invoeren..." onkeypress="if(event.key==='Enter') voegWoordToe()">
+            <button id="addBtn" class="digibord-btn add" onclick="voegWoordToe()">➕ Toevoegen</button>
             <button id="clearBtn" class="digibord-btn clear">🗑️ Wis Bord</button>
             <span id="boardClassIndicator" style="font-weight:bold; color:var(--accent-cyan); font-size:14px; margin-left:12px;">Live Bord: Klas Alpha</span>
         </div>
@@ -403,17 +505,21 @@
                 </div>
 
                 <div class="btn-row">
-                    <button class="btn-save" onclick="opslaan()">INDIENEN BIJ OFFICIER</button>
-                    <button class="btn-reset" onclick="resetPV()" title="Verwijdert alle ingeleverde dossiers uit de database en wist het scherm">🗑️ Reset Alles (Wis Database)</button>
+                    <button id="saveBtn" class="btn-save" onclick="opslaan()">INDIENEN &amp; DELEN MET KLAS</button>
+                    <button class="btn-clear-local" onclick="wisEigenTekst()" title="Maakt alleen jouw eigen tekstvak leeg">🧹 Wis Tekstvak</button>
+                    <button class="btn-reset" onclick="resetPV()" title="Verwijdert alle ingeleverde dossiers van jouw klas uit de database">🗑️ Reset Klas-DB</button>
                 </div>
 
                 <div class="livefeed-box">
                     <div class="livefeed-header">
-                        <span>📡 Livefeed ingeleverde dossiers (alle studenten):</span>
-                        <span id="feed-count" style="color:#2563eb;">0 ingeleverd</span>
+                        <span id="livefeedTitle">📡 Livefeed ingeleverde dossiers (klik om te lezen &amp; beoordelen):</span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span id="dossierDbStatus" class="db-pill">Verbinden...</span>
+                            <span id="feed-count" style="color:#2563eb;">0 ingeleverd</span>
+                        </div>
                     </div>
                     <div class="livefeed-items" id="liveFeedList">
-                        <div style="color:#94a3b8; font-size:0.75em; font-style:italic;">Nog geen aangiftes ingediend.</div>
+                        <div style="color:#94a3b8; font-size:0.75em; font-style:italic;">Nog geen aangiftes ingediend in deze klas.</div>
                     </div>
                 </div>
             </div>
@@ -421,7 +527,95 @@
     </div>
 </div>
 
-<!-- ==================== TAB 3: QUIZLET ==================== -->
+<!-- ==================== TAB 3: KLAS-DOSSIERS & BEOORDELEN ==================== -->
+<div id="tab-dossiers" class="tab-content">
+    <div class="dossiers-container">
+        <div class="dossiers-list-panel">
+            <div class="dossiers-panel-header">
+                <div>
+                    <b id="dossiersKlasTitle" style="color:#f8fafc; font-size:1.02em;">📂 Inzendingen Klas -</b>
+                    <div style="font-size:0.8em; color:#94a3b8;">Klik op een deelnemer om de volledige tekst te lezen &amp; beoordelen.</div>
+                </div>
+                <span id="dossierDbStatusTab" class="db-pill">Verbinden...</span>
+            </div>
+            <div class="dossiers-scroll" id="dossiersList">
+                <div style="color:#94a3b8; font-size:0.9em; padding:12px; text-align:center;">
+                    Nog geen Proces-Verbalen ingeleverd in deze klas.
+                </div>
+            </div>
+        </div>
+
+        <div class="dossier-detail-panel" id="dossierDetailPanel">
+            <div class="dossier-empty" id="dossierEmptyState">
+                <div style="font-size:2.4em;">📄</div>
+                <b style="color:#f8fafc; font-size:1.1em;">Selecteer een deelnemer links om het dossier te lezen</b>
+                <span>Zodra iemand uit jouw NATO-klas op <b>"Indienen &amp; Delen met Klas"</b> klikt, verschijnt de volledige tekst hier realtime.</span>
+            </div>
+
+            <div class="dossier-detail-scroll" id="dossierDetailContent" style="display:none;">
+                <div class="dossier-full-box">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; border-bottom:1.5px solid #e2e8f0; padding-bottom:10px;">
+                        <div>
+                            <div style="font-size:1.25em; font-weight:800; color:#0f172a;" id="detailStudent">-</div>
+                            <div style="font-size:0.88em; color:#475569;" id="detailMeta">-</div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <span id="detailScoreBadge" class="dossier-score-pill">0% compleet</span>
+                            <span id="detailAvgBadge" style="background:#fef3c7; color:#92400e; font-size:0.82em; font-weight:800; padding:3px 9px; border-radius:999px;">Nog geen sterren</span>
+                        </div>
+                    </div>
+
+                    <div class="dossier-full-text" id="detailFullText"></div>
+
+                    <div class="criteria-tags" id="detailCriteriaTags"></div>
+                </div>
+
+                <div class="review-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <b style="color:var(--accent-cyan); font-size:1.05em;">⭐ Beoordeel dit Proces-Verbaal</b>
+                        <span style="font-size:0.82em; color:#94a3b8;">Beoordeling wordt direct opgeslagen voor de hele klas</span>
+                    </div>
+
+                    <div class="star-row" id="starRow">
+                        <span style="font-size:0.88em; color:#cbd5e1; margin-right:6px;">Cijfer:</span>
+                        <button type="button" class="star-btn" data-star="1" onclick="setStars(1)">★</button>
+                        <button type="button" class="star-btn" data-star="2" onclick="setStars(2)">★</button>
+                        <button type="button" class="star-btn" data-star="3" onclick="setStars(3)">★</button>
+                        <button type="button" class="star-btn" data-star="4" onclick="setStars(4)">★</button>
+                        <button type="button" class="star-btn" data-star="5" onclick="setStars(5)">★</button>
+                        <span id="starLabel" style="font-size:0.86em; color:#fbbf24; font-weight:700; margin-left:8px;">Kies sterren</span>
+                    </div>
+
+                    <div class="quick-tags" id="quickTags">
+                        <button type="button" class="q-tag" onclick="toggleReviewTag(this)">Volledig signalement</button>
+                        <button type="button" class="q-tag" onclick="toggleReviewTag(this)">Goede OVT-verleden tijd</button>
+                        <button type="button" class="q-tag" onclick="toggleReviewTag(this)">Duidelijke omgeving</button>
+                        <button type="button" class="q-tag" onclick="toggleReviewTag(this)">Geen toestemming vermeld</button>
+                        <button type="button" class="q-tag" onclick="toggleReviewTag(this)">Mist nog details</button>
+                    </div>
+
+                    <textarea id="reviewComment" class="review-textarea" placeholder="Schrijf hier je feedback voor deze deelnemer (bijv. wat goed was of wat nog mist in het signalement)..."></textarea>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <button type="button" id="submitReviewBtn" class="btn-review-submit" onclick="verzendBeoordeling()">
+                            📨 Beoordeling Plaatsen
+                        </button>
+                        <button type="button" onclick="switchTab('tab-quizlet')" style="background:var(--success); color:white; border:none; padding:10px 16px; border-radius:8px; font-weight:800; cursor:pointer;">
+                            Ga verder naar 4. Quizlet Live ➔
+                        </button>
+                    </div>
+
+                    <div style="border-top:1px solid #334155; padding-top:12px; margin-top:4px;">
+                        <b style="font-size:0.92em; color:#e2e8f0;">💬 Geplaatste beoordelingen (<span id="reviewsCount">0</span>):</b>
+                        <div class="reviews-list" id="dossierReviewsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== TAB 4: QUIZLET ==================== -->
 <div id="tab-quizlet" class="tab-content">
     <div class="quizlet-container">
         <div class="quizlet-header">
@@ -452,6 +646,16 @@
 </div>
 
 <script>
+    // --- HELPERS ---
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     // --- LOKALE CHATBOT-ENGINE (ZONDER API KEY) ---
     let botState = { id: null, seen: {}, last: [], offer: null, turn: 0, fb: 0 };
 
@@ -685,7 +889,6 @@
             return `Ik ben de aangever hoor ${d.aanhef}, geen verdachte! Maar vraagt u maar raak hoor.`;
         }
 
-        // Specifieke contrastchecks (baard- & hoofdvorm)
         const cChecks = [
             { t: "ring", k: "beard", re: /\b(ringbaard|goatee)\b/ },
             { t: "hout", k: "beard", re: /\b(houthakker|houthakkersbaard|volle baard|ruige baard|lange baard)\b/ },
@@ -713,14 +916,12 @@
             }
         }
 
-        // Bevestiging op eerder aanbod ("ja graag", "vertel maar")
         if (words.length <= 5 && /^(ja+|jazeker|graag|zeker|vertel|vertel maar|doe maar|ga verder|en verder|en toen|daarna|meer|nog meer|ok|oke|prima)\b/.test(n) && botState.offer === "gezicht") {
             botState.offer = null;
             botState.last = ["hoofd", "baard"];
             return stressPrefix(d) + pickKB(d, "hoofd") + " " + pickKB(d, "baard");
         }
 
-        // Vervolgvraag over kleur
         if (/\b(welke kleur|wat voor kleur|kleuren|kleur)\b/.test(n) && !/\b(huidskleur|jas|broek|schoen|fiets|baard|haar)\b/.test(n)) {
             botState.offer = null;
             if (botState.last.includes("kleding")) return stressPrefix(d) + pickKB(d, "kleding");
@@ -729,7 +930,6 @@
             return stressPrefix(d) + pickKB(d, "kleding") + " " + pickKB(d, "baard");
         }
 
-        // Multi-intent detectie
         const det = [];
         const hasGreet = /\b(hoi|hallo|hey|goedendag|goedemorgen|goedemiddag|goedenavond|dag|welkom)\b/.test(n);
         const hasComfort = /\b(koffie|thee|water|drinken|glaasje|kopje|gaat het|hoe gaat|hoe voelt|rustig aan|stoel|neem plaats)\b/.test(n);
@@ -832,7 +1032,7 @@
         return stressPrefix(d) + fbTxt;
     }
 
-    // --- FIREBASE 1: HOOFDAPP (Aangiftes & Livefeed) ---
+    // --- FIREBASE 1: HOOFDAPP (Aangiftes & Beoordelingen) ---
     const firebaseConfig = { 
         apiKey: "AIzaSyC-Of0AUOd-kVo2RKxYc-68Gr-RO4HdRk0", 
         authDomain: "q2aangifteles2.firebaseapp.com", 
@@ -855,8 +1055,23 @@
     const digibordApp = firebase.initializeApp(digibordConfig, "digibordSecondaryApp");
     const digibordDb = digibordApp.database();
 
+    // Actieve database voor dossiers (met automatische fallback naar digibordDb bij rechtenfout)
+    let activeDossierDb = db;
+    let currentDossiersRef = null;
+    let currentDossierConnRef = null;
+
     let actieveKlas = "Alpha";
-    let studentNaam = "";
+    let studentNaam = "Student";
+    let myClientId = sessionStorage.getItem('politie_client_id');
+    if (!myClientId) {
+        myClientId = 'cli_' + Math.random().toString(36).slice(2, 10);
+        sessionStorage.setItem('politie_client_id', myClientId);
+    }
+
+    // Live cache van alle ingeleverde dossiers in actieveKlas
+    let klasDossiersMap = {};
+    let selectedDossierId = null;
+    let selectedStars = 0;
 
     function voltooiLogin() {
         actieveKlas = document.getElementById('loginKlas').value;
@@ -866,8 +1081,8 @@
         document.getElementById('klasDisplay').innerText = `Klas: ${actieveKlas} (${studentNaam})`;
         document.getElementById('loginOverlay').style.display = 'none';
 
-        // Synchroniseer het digibord direct met de gekozen NATO-klas
         initDigibordSync();
+        activeerLiveFeed();
     }
 
     // --- DEFINITIE VAN DE 4 CASUSSEN ---
@@ -876,18 +1091,7 @@
             id: 0,
             naam: "Evi de Vries",
             intro: "Goedendag agent. Ik ben Evi de Vries (04-11-2002). Ik kom aangifte doen van de diefstal van mijn witte Gazelle Esprit fiets... kunt u mij alstublieft helpen?",
-            systemPrompt: `Je bent Evi de Vries (geboren 04-11-2002, 22 jaar, woont Vredenburg 24-B in Utrecht). Je doet aangifte van diefstal van je witte Gazelle Esprit damesfiets (dagwaarde € 650,-). 
-OMGEVING (EXTERIEUR): Het delict vond plaats 's nachts rond 03:00 uur aan de Vredenburg in Utrecht. Buiten op straat: donker, natte glimmende klinkers, flikkerende straatlantaarns, stapels terrasstoelen met sloten tegen cafégevels, kille nachtlucht, en je kapotgeknipte cijferslot lag op straat.
-SIGNALEMENT DADER:
-- Geslacht: Man.
-- Postuur & Lengte: ca. 1.85m lang, normaal tot licht gezet postuur.
-- Kleding: Donkerblauwe gewatteerde jas (parka) met capuchon, zwarte spijkerbroek, donkere schoenen.
-- VORM VAN HET HOOFD: Een langwerpig, smal en hoekig gezicht met een scherpe, strakke kaaklijn.
-- BAARD: Een lange, ruige volle baard (houthakkersbaard) van zeker 5 à 6 centimeter lang, ruig en ongekamd, kastanjebruin met een wat rossige gloed. (Geen getrimde ringbaard!).
-GEDRAGSREGELS:
-- Reageer vloeiend, menselijk, realistisch en emotioneel als een studente die net haar fiets kwijt is.
-- GEEF TE ALLEN TIJDE ANTWOORD op vragen van de politie. Weiger nooit te antwoorden.
-- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Gebruik nooit exact dezelfde zinnen. Varieer in formulering, perspectief en details.`,
+            systemPrompt: `Je bent Evi de Vries.`,
             criteria: [
                 { id: 'c1', l: 'NAAM', w: ['evi', 'vries'] },
                 { id: 'c2', l: 'GEB.DATUM', w: ['4 november', '2002', '04-11'] },
@@ -905,19 +1109,7 @@ GEDRAGSREGELS:
             id: 1,
             naam: "Evert Pot",
             intro: "Goedemiddag agent, ik ben Evert Pot, filiaalmanager van de Albert Heijn aan de Leusderweg in Amersfoort. Ik kom aangifte doen van een brutale winkeldiefstal die ik zojuist op onze camera's heb vastgelegd.",
-            systemPrompt: `Je bent Evert Pot (geboren 18-05-1976, 48 jaar, filiaalmanager van de Albert Heijn aan de Leusderweg in Amersfoort). 
-FEIT: Diefstal van een fles Andrélon shampoo (€ 4,79) door een man die deze in de binnenzak van zijn jas stopte en wegliep zonder te betalen.
-OMGEVING (INTERIEUR): Albert Heijn filiaal Leusderweg. Drukke winkel, fel wit TL-licht, piepende zelfscankassa's, winkelwagentjes. Het gebeurde in pad 4: de rij persoonlijke verzorgingsmiddelen en shampoo, direct gelegen naast het gangpad van de chips en borrelnootjes. Er hangt een mengeling van zoete shampoogeur en paprikachips.
-SIGNALEMENT DADER:
-- Geslacht: Man.
-- Postuur & Lengte: ca. 1.85m lang, normaal tot licht gezet postuur.
-- Kleding: Donkerblauwe gewatteerde jas (parka) met capuchon, zwarte spijkerbroek, grijze sneakers.
-- VORM VAN HET HOOFD: Een opvallend rond tot ovaal gezicht met volle wangen.
-- BAARD: Een strak getrimde ringbaard (goatee rond de mond en kin) van ongeveer 1 centimeter lang. Zeer verzorgd en strak afgelijnd; de wangen en de hals zijn spekglad geschoren. Donkerbruine baardharen met enkele grijze haartjes.
-GEDRAGSREGELS:
-- Spreek kordaat, zakelijk, professioneel en duidelijk als een ervaren winkelmanager.
-- GEEF TE ALLEN TIJDE ANTWOORD op vragen van de politie.
-- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Herhaal nooit dezelfde zinnen; geef telkens nieuwe observaties van de camerabeelden en de winkelvloer.`,
+            systemPrompt: `Je bent Evert Pot.`,
             criteria: [
                 { id: 'c1', l: 'NAAM', w: ['evert', 'pot'] },
                 { id: 'c2', l: 'FUNCTIE', w: ['filiaalmanager', 'manager', 'albert heijn', 'ah'] },
@@ -935,18 +1127,7 @@ GEDRAGSREGELS:
             id: 2,
             naam: "Lisa Lood",
             intro: "Hallo agent... ik tril er nog helemaal van. Ik ben Lisa Lood (geboren 14-09-1997). Ik ben zojuist onderweg naar huis op straat plotseling aangerand en onzedelijk betast...",
-            systemPrompt: `Je bent Lisa Lood (geboren 14-09-1997, 27 jaar, woont Singelstraat 12 in Utrecht). Je bent zojuist slachtoffer geworden van een onzedelijke betasting op straat. Een man greep je vast en betastte je borsten en billen over je kleding heen.
-OMGEVING (EXTERIEUR): Het gebeurde rond 22:45 uur op het wandelpad in het Zocherpark nabij de Singel. Het was aardedonker tussen de hoge bomen, nat asfalt na een regenbui, de geur van natte herfstbladeren, een flauwe oranje straatlantaarn in de verte en het zachte gezoem van een transformatorkast.
-SIGNALEMENT DADER:
-- Geslacht: Man.
-- Postuur & Lengte: ca. 1.75m lang, opvallend slank en tenger gebouwd.
-- Kleding: Olijfgroen bomberjack, lichtgrijze joggingbroek, witte sportschoenen.
-- VORM VAN HET HOOFD: Een hartvormig gezicht met hoge, brede jukbeenderen en een smalle, puntige kin.
-- BAARD: Een lichte, vlassige drie-dagen-stoppelbaard van enkele millimeters over zijn kaak en wangen. Blond tot lichtrossige stoppels, nauwelijks een snor.
-GEDRAGSREGELS:
-- Je bent geschrokken en emotioneel, maar wil dolgraag dat de politie deze viezerik arresteert.
-- GEEF TE ALLEN TIJDE ANTWOORD op elke vraag van de verhoorder.
-- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Breng telkens nuances, zintuiglijke details of emoties naar voren zonder jezelf te herhalen.`,
+            systemPrompt: `Je bent Lisa Lood.`,
             criteria: [
                 { id: 'c1', l: 'NAAM', w: ['lisa', 'lood'] },
                 { id: 'c2', l: 'GEB.DATUM', w: ['1997', '14 september', '27 jaar'] },
@@ -964,19 +1145,7 @@ GEDRAGSREGELS:
             id: 3,
             naam: "Lodewijk van der Ee",
             intro: "Dag agent... neem me niet kwalijk dat ik zo van slag ben. Ik ben Lodewijk van der Ee, 81 jaar oud (03-02-1943). Er heeft zojuist een brutale oplichter aan mijn voordeur gestaan die mij met een smoes bestolen heeft.",
-            systemPrompt: `Je bent Lodewijk van der Ee (geboren 03-02-1943, 81 jaar, weduwnaar, woont Parklaan 88-A in Amersfoort). 
-FEIT: Oplichting / babbeltruc aan de voordeur. Een jongeman deed zich voor als controleur van de waterleiding en bank, en heeft met een babbeltruc jouw portemonnee met € 350,- contant geld en je pinpas ontfutseld.
-OMGEVING (INTERIEUR): Jouw seniorenappartement aan de Parklaan. In de gang bij de voordeur: klassiek groen-geel bloemetjesbehang, zacht hoogpolig tapijt, de geur van filterkoffie en lavendelzeep, een donker eikenhouten kapstok met je regenjas, en de houten voordeur met een zware koperen kierstandhouder/ketting.
-SIGNALEMENT DADER:
-- Geslacht: Man.
-- Postuur & Lengte: ca. 1.75m lang, opvallend slank en tenger gebouwd.
-- Kleding: Olijfgroen jack (bomberjack), lichte grijze broek, witte sportschoenen.
-- VORM VAN HET HOOFD: Een vierkant, blokvormig hoofd met een brede, platte kaaklijn en een stompe kin.
-- BAARD: Een uiterst precies gestyled klein sikje op de punt van de kin (soul patch / chin puff) gecombineerd met een smal potloodsnorretje (pencil moustache). Ravenzwart haar. Zijn wangen en kaakhoeken waren volkomen gladgeschoren.
-GEDRAGSREGELS:
-- Spreek als een beleefde, wat oudere heer van stand ("meneer de agent", netjes geformuleerd, aangedaan door het verlies van vertrouwen).
-- GEEF TE ALLEN TIJDE ANTWOORD op elke vraag.
-- HERHALINGEN VAN ANTWOORDEN ZIJN VERBODEN! Gebruik telkens andere bewoordingen en noem details van de woning of het gesprek aan de deur.`,
+            systemPrompt: `Je bent Lodewijk van der Ee.`,
             criteria: [
                 { id: 'c1', l: 'NAAM', w: ['lodewijk', 'van der ee', 'ee'] },
                 { id: 'c2', l: 'GEB.DATUM', w: ['1943', '3 februari', '81 jaar', 'bejaard'] },
@@ -1038,7 +1207,7 @@ GEDRAGSREGELS:
         document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
     }
 
-    // --- CASUS INSTELLEN (AD RANDOM OF HANDMATIG) ---
+    // --- CASUS INSTELLEN ---
     function wisselCasus(index) {
         actieveCasus = casussen[index];
         document.getElementById('casusSelect').value = index;
@@ -1055,7 +1224,6 @@ GEDRAGSREGELS:
         const msgBox = document.getElementById('messages');
         msgBox.innerHTML = `<div class="bubble evi"><b>${actieveCasus.naam}:</b> ${actieveCasus.intro}</div>`;
 
-        // Dashboard ZONDER hover-tips
         const dash = document.getElementById('dash');
         dash.innerHTML = "";
         actieveCasus.criteria.forEach(c => {
@@ -1084,7 +1252,7 @@ GEDRAGSREGELS:
         stress = Math.min(questions * 8, 100);
         updateStress();
 
-        box.innerHTML += `<div class="bubble agent">${vraag}</div>`;
+        box.innerHTML += `<div class="bubble agent">${escapeHtml(vraag)}</div>`;
         inp.value = '';
         box.scrollTop = box.scrollHeight;
 
@@ -1104,7 +1272,7 @@ GEDRAGSREGELS:
             if (thinkingEl) thinkingEl.remove();
 
             chatHistorie.push({ role: "assistant", content: antwoord });
-            box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> ${antwoord}</div>`;
+            box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> ${escapeHtml(antwoord)}</div>`;
         } finally {
             isWaitingForAI = false;
             sendBtn.disabled = false;
@@ -1123,6 +1291,26 @@ GEDRAGSREGELS:
     }
 
     // --- DIEPTE ANALYSE LOGICA ---
+    function berekenCriteriaStatus() {
+        if (!actieveCasus) return { score: 0, missing: [], metLabels: [], allLabels: [] };
+        const txt = document.getElementById('pvEditor').value.toLowerCase();
+        let score = 0;
+        let missing = [];
+        let metLabels = [];
+        let allLabels = [];
+
+        actieveCasus.criteria.forEach(c => {
+            allLabels.push(c.l);
+            if (c.w.some(word => txt.includes(word))) {
+                score++;
+                metLabels.push(c.l);
+            } else {
+                missing.push(c.l);
+            }
+        });
+        return { score, missing, metLabels, allLabels };
+    }
+
     function analyseerTekst() {
         if(!actieveCasus) return;
         const txt = document.getElementById('pvEditor').value.toLowerCase();
@@ -1151,75 +1339,367 @@ GEDRAGSREGELS:
         }
     }
 
-    // --- TIMER, OPSLAAN & LIVEFEED ---
+    // --- TIMER, OPSLAAN, LIVEFEED & KLAS-BEOORDELING ---
     let s = 0; 
     setInterval(() => { 
         s++; 
         document.getElementById('timer').innerText = Math.floor(s/60).toString().padStart(2,'0')+":"+(s%60).toString().padStart(2,'0'); 
     }, 1000);
-    
-    function opslaan() { 
+
+    function updateDossierDbStatus(state, text) {
+        const pills = [document.getElementById('dossierDbStatus'), document.getElementById('dossierDbStatusTab')];
+        pills.forEach(pill => {
+            if (!pill) return;
+            pill.classList.remove('online', 'error');
+            if (state === 'online') pill.classList.add('online');
+            if (state === 'error') pill.classList.add('error');
+            pill.innerText = text;
+        });
+    }
+
+    function getDossiersRef() {
+        return activeDossierDb.ref(`dossiers/${actieveKlas}`);
+    }
+
+    async function opslaan() { 
         const pv = document.getElementById('pvEditor').value.trim();
         if(pv.length < 50) return alert("Het Proces-Verbaal is nog te summier (minimaal 50 tekens).");
-        
-        try {
-            db.ref('dossiers').push({ 
-                klas: actieveKlas,
-                student: studentNaam,
-                casus: actieveCasus.naam,
-                tekst: pv.substring(0, 80) + "...", 
-                stress_level: stress,
-                tijdstip: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-            });
-        } catch(e) {
-            console.warn("Offline of Firebase niet bereikbaar:", e);
-        }
 
-        alert("Aangifte succesvol ingediend bij de Officier van Justitie! Je wordt nu doorgeleid naar Quizlet Live.");
-        switchTab('tab-quizlet');
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerText = "⏳ Bezig met opslaan...";
+
+        const { score, metLabels, allLabels } = berekenCriteriaStatus();
+        const payload = {
+            klas: actieveKlas,
+            student: studentNaam,
+            clientId: myClientId,
+            casusId: actieveCasus.id,
+            casus: actieveCasus.naam,
+            tekst: pv,
+            scorePerc: score * 10,
+            criteriaBehaald: metLabels,
+            criteriaTotaal: allLabels,
+            stress_level: stress,
+            tijdstip: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        try {
+            const newRef = getDossiersRef().push();
+            await newRef.set(payload);
+            selectedDossierId = newRef.key;
+            switchTab('tab-dossiers');
+            renderDossierDetail(selectedDossierId, true);
+        } catch(e) {
+            console.warn("Primaire DB schrijffout, probeer fallback DB:", e);
+            try {
+                activeDossierDb = digibordDb;
+                activeerLiveFeed();
+                const fbRef = getDossiersRef().push();
+                await fbRef.set(payload);
+                selectedDossierId = fbRef.key;
+                switchTab('tab-dossiers');
+                renderDossierDetail(selectedDossierId, true);
+            } catch (err2) {
+                console.error("Opslaan mislukt:", err2);
+                alert("Kon het Proces-Verbaal niet opslaan in de database: " + (err2.message || err2));
+            }
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "INDIENEN & DELEN MET KLAS";
+        }
+    }
+
+    function wisEigenTekst() {
+        if (confirm("Wil je alleen jouw eigen tekstvak leegmaken? (Ingeleverde dossiers van de klas blijven bewaard)")) {
+            document.getElementById('pvEditor').value = '';
+            analyseerTekst();
+        }
     }
 
     function resetPV() {
-        if(confirm("LET OP: Weet je zeker dat je ALLE ingeleverde dossiers uit de database wilt wissen en het scherm wilt resetten?")) {
-            db.ref('dossiers').remove().then(() => {
+        if(confirm(`LET OP: Weet je zeker dat je ALLE ingeleverde dossiers van klas ${actieveKlas} uit de database wilt wissen?`)) {
+            getDossiersRef().remove().then(() => {
+                selectedDossierId = null;
                 document.getElementById('pvEditor').value = '';
                 analyseerTekst();
             }).catch(err => {
                 console.error("Fout bij wissen:", err);
-                document.getElementById('pvEditor').value = '';
-                analyseerTekst();
+                alert("Wissen mislukt: " + (err.message || err));
             });
         }
     }
 
+    function getReviewsArray(dossier) {
+        if (!dossier || !dossier.beoordelingen) return [];
+        return Object.entries(dossier.beoordelingen)
+            .map(([id, rev]) => ({ id, ...rev }))
+            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    }
+
+    function calcAverageStars(reviews) {
+        if (!reviews.length) return { avg: 0, count: 0 };
+        const sum = reviews.reduce((acc, r) => acc + (Number(r.sterren) || 0), 0);
+        return { avg: (sum / reviews.length).toFixed(1), count: reviews.length };
+    }
+
+    function openDossier(dossierKey) {
+        selectedDossierId = dossierKey;
+        switchTab('tab-dossiers');
+        renderKlasDossiersLijst();
+        renderDossierDetail(dossierKey, true);
+    }
+
     function activeerLiveFeed() {
+        if (currentDossiersRef) currentDossiersRef.off();
+        if (currentDossierConnRef) currentDossierConnRef.off();
+
+        document.getElementById('livefeedTitle').innerText = `📡 Livefeed klas ${actieveKlas} (klik om te lezen & beoordelen):`;
+        document.getElementById('dossiersKlasTitle').innerText = `📂 Inzendingen Klas ${actieveKlas}`;
+        updateDossierDbStatus('connecting', 'Verbinden...');
+
+        currentDossierConnRef = activeDossierDb.ref('.info/connected');
+        currentDossierConnRef.on('value', (snap) => {
+            if (snap.val() === true) {
+                updateDossierDbStatus('online', `● LIVE (${actieveKlas})`);
+            }
+        });
+
+        currentDossiersRef = getDossiersRef();
+        currentDossiersRef.on('value', (snapshot) => {
+            updateDossierDbStatus('online', `● LIVE (${actieveKlas})`);
+            klasDossiersMap = snapshot.val() || {};
+
+            renderMiniLiveFeed();
+            renderKlasDossiersLijst();
+
+            // Update geselecteerd dossier live zonder formulier te wissen
+            if (selectedDossierId && klasDossiersMap[selectedDossierId]) {
+                renderDossierDetail(selectedDossierId, false);
+            } else if (selectedDossierId && !klasDossiersMap[selectedDossierId]) {
+                selectedDossierId = null;
+                showEmptyDossierState();
+            }
+        }, (err) => {
+            console.warn("Firebase dossiers leesfout:", err);
+            if (activeDossierDb !== digibordDb) {
+                activeDossierDb = digibordDb;
+                activeerLiveFeed();
+            } else {
+                updateDossierDbStatus('error', 'DB Fout');
+            }
+        });
+    }
+
+    function getSortedDossierEntries() {
+        return Object.entries(klasDossiersMap).sort((a, b) => {
+            return (b[1].timestamp || 0) - (a[1].timestamp || 0);
+        });
+    }
+
+    function renderMiniLiveFeed() {
         const feedList = document.getElementById('liveFeedList');
         const feedCount = document.getElementById('feed-count');
+        const tabBadge = document.getElementById('dossierTabBadge');
+        const entries = getSortedDossierEntries();
+
+        feedCount.innerText = `${entries.length} ingeleverd`;
+        tabBadge.innerText = entries.length;
+
+        if (!entries.length) {
+            feedList.innerHTML = `<div style="color:#94a3b8; font-size:0.78em; font-style:italic;">Nog geen aangiftes ingediend in klas ${escapeHtml(actieveKlas)}.</div>`;
+            return;
+        }
+
+        feedList.innerHTML = '';
+        entries.forEach(([key, item]) => {
+            const reviews = getReviewsArray(item);
+            const { avg, count } = calcAverageStars(reviews);
+            const starTxt = count > 0 ? ` · ⭐ ${avg} (${count})` : '';
+            const preview = (item.tekst || '').replace(/\s+/g, ' ').slice(0, 65);
+
+            const el = document.createElement('div');
+            el.className = 'feed-item';
+            el.onclick = () => openDossier(key);
+            el.innerHTML = `
+                <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    <b>${escapeHtml(item.student || 'Student')}</b> (${escapeHtml(item.casus || 'Casus')}): "${escapeHtml(preview)}..."
+                </span>
+                <span class="feed-badge">📖 Lezen (${item.scorePerc ?? 0}%${starTxt})</span>
+            `;
+            feedList.appendChild(el);
+        });
+    }
+
+    function renderKlasDossiersLijst() {
+        const listEl = document.getElementById('dossiersList');
+        const entries = getSortedDossierEntries();
+
+        if (!entries.length) {
+            listEl.innerHTML = `
+                <div style="color:#94a3b8; font-size:0.9em; padding:18px; text-align:center;">
+                    Nog geen Proces-Verbalen ingeleverd in klas <b>${escapeHtml(actieveKlas)}</b>.<br><br>
+                    Ga naar tabblad <b>2. Verhoor &amp; Aangifte</b> en klik op <i>"Indienen &amp; Delen met Klas"</i>.
+                </div>`;
+            return;
+        }
+
+        // Selecteer automatisch de nieuwste als er nog niets geselecteerd is
+        if (!selectedDossierId || !klasDossiersMap[selectedDossierId]) {
+            selectedDossierId = entries[0][0];
+            renderDossierDetail(selectedDossierId, true);
+        }
+
+        listEl.innerHTML = '';
+        entries.forEach(([key, item]) => {
+            const reviews = getReviewsArray(item);
+            const { avg, count } = calcAverageStars(reviews);
+            const isMine = item.clientId === myClientId;
+            const preview = (item.tekst || '').replace(/\s+/g, ' ').slice(0, 90);
+
+            const card = document.createElement('div');
+            card.className = 'dossier-card' + (key === selectedDossierId ? ' active' : '');
+            card.onclick = () => {
+                selectedDossierId = key;
+                renderKlasDossiersLijst();
+                renderDossierDetail(key, true);
+            };
+            card.innerHTML = `
+                <div class="dossier-card-top">
+                    <span class="dossier-student">${escapeHtml(item.student || 'Student')}${isMine ? ' <span style="color:var(--accent-cyan); font-size:0.8em;">(Jij)</span>' : ''}</span>
+                    <span class="dossier-score-pill">${item.scorePerc ?? 0}% compleet</span>
+                </div>
+                <div class="dossier-meta-line">Casus: <b>${escapeHtml(item.casus || '-')}</b> · ${escapeHtml(item.tijdstip || '')}</div>
+                <div class="dossier-preview">${escapeHtml(preview)}</div>
+                <div class="dossier-rating-summary">
+                    <span>${count > 0 ? `⭐ ${avg} / 5 (${count} beoordeling${count === 1 ? '' : 'en'})` : '☆ Nog niet beoordeeld'}</span>
+                    <span style="color:var(--accent-cyan);">Openen ➔</span>
+                </div>
+            `;
+            listEl.appendChild(card);
+        });
+    }
+
+    function showEmptyDossierState() {
+        document.getElementById('dossierEmptyState').style.display = 'flex';
+        document.getElementById('dossierDetailContent').style.display = 'none';
+    }
+
+    function renderDossierDetail(dossierKey, resetReviewForm) {
+        const item = klasDossiersMap[dossierKey];
+        if (!item) {
+            showEmptyDossierState();
+            return;
+        }
+
+        document.getElementById('dossierEmptyState').style.display = 'none';
+        document.getElementById('dossierDetailContent').style.display = 'flex';
+
+        const reviews = getReviewsArray(item);
+        const { avg, count } = calcAverageStars(reviews);
+
+        document.getElementById('detailStudent').innerText = `${item.student || 'Student'} — ${item.casus || 'Casus'}`;
+        document.getElementById('detailMeta').innerText = `Klas ${item.klas || actieveKlas} · Ingeleverd om ${item.tijdstip || '-'} · Aangifte-spanning: ${item.stress_level ?? 0}%`;
+        document.getElementById('detailScoreBadge').innerText = `${item.scorePerc ?? 0}% checklist`;
+        document.getElementById('detailAvgBadge').innerText = count > 0 ? `⭐ ${avg} / 5 (${count})` : 'Nog geen sterren';
+        document.getElementById('detailFullText').innerText = item.tekst || '';
+
+        const critBox = document.getElementById('detailCriteriaTags');
+        critBox.innerHTML = '';
+        const metSet = new Set(item.criteriaBehaald || []);
+        const allCriteria = item.criteriaTotaal || (casussen[item.casusId]?.criteria.map(c => c.l) || []);
+        allCriteria.forEach(label => {
+            const span = document.createElement('span');
+            span.className = 'crit-tag' + (metSet.has(label) ? ' met' : '');
+            span.innerText = (metSet.has(label) ? '✓ ' : '○ ') + label;
+            critBox.appendChild(span);
+        });
+
+        if (resetReviewForm) {
+            setStars(0);
+            document.getElementById('reviewComment').value = '';
+            document.querySelectorAll('#quickTags .q-tag').forEach(btn => btn.classList.remove('active'));
+        }
+
+        // Altijd live beoordelingenlijst bijwerken
+        document.getElementById('reviewsCount').innerText = reviews.length;
+        const revList = document.getElementById('dossierReviewsList');
+        if (!reviews.length) {
+            revList.innerHTML = `<div style="color:#94a3b8; font-size:0.86em; font-style:italic;">Nog geen beoordelingen geplaatst. Wees de eerste!</div>`;
+        } else {
+            revList.innerHTML = '';
+            reviews.forEach(rev => {
+                const starsStr = '★'.repeat(rev.sterren || 0) + '☆'.repeat(5 - (rev.sterren || 0));
+                const tagsHtml = (rev.tags && rev.tags.length)
+                    ? `<div class="review-item-tags">${rev.tags.map(t => `<span class="review-tag-pill">${escapeHtml(t)}</span>`).join('')}</div>`
+                    : '';
+                const div = document.createElement('div');
+                div.className = 'review-item';
+                div.innerHTML = `
+                    <div class="review-item-head">
+                        <span><b style="color:#f8fafc;">${escapeHtml(rev.beoordelaar || 'Klasgenoot')}</b> <span style="color:#94a3b8;">· ${escapeHtml(rev.tijdstip || '')}</span></span>
+                        <span style="color:#fbbf24; font-weight:800; letter-spacing:1px;">${starsStr} (${rev.sterren || 0}/5)</span>
+                    </div>
+                    ${tagsHtml}
+                    ${rev.opmerking ? `<div style="color:#e2e8f0; font-size:0.9em; line-height:1.45; white-space:pre-wrap;">${escapeHtml(rev.opmerking)}</div>` : ''}
+                `;
+                revList.appendChild(div);
+            });
+        }
+    }
+
+    function setStars(n) {
+        selectedStars = n;
+        document.querySelectorAll('#starRow .star-btn').forEach(btn => {
+            const val = parseInt(btn.getAttribute('data-star'));
+            btn.classList.toggle('active', val <= n);
+        });
+        const labels = ["Kies sterren", "1/5 — Onvoldoende", "2/5 — Matig", "3/5 — Voldoende", "4/5 — Goed", "5/5 — Uitstekend!"];
+        document.getElementById('starLabel').innerText = labels[n] || labels[0];
+    }
+
+    function toggleReviewTag(btn) {
+        btn.classList.toggle('active');
+    }
+
+    async function verzendBeoordeling() {
+        if (!selectedDossierId || !klasDossiersMap[selectedDossierId]) {
+            return alert("Selecteer eerst een dossier om te beoordelen.");
+        }
+        const comment = document.getElementById('reviewComment').value.trim();
+        const tags = Array.from(document.querySelectorAll('#quickTags .q-tag.active')).map(b => b.innerText);
+
+        if (selectedStars === 0 && !comment && tags.length === 0) {
+            return alert("Kies minimaal een aantal sterren, een tag of schrijf een opmerking.");
+        }
+
+        const btn = document.getElementById('submitReviewBtn');
+        btn.disabled = true;
+        btn.innerText = "⏳ Opslaan...";
+
+        const reviewPayload = {
+            beoordelaar: studentNaam,
+            clientId: myClientId,
+            klas: actieveKlas,
+            sterren: selectedStars || 3,
+            tags: tags,
+            opmerking: comment,
+            tijdstip: new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
 
         try {
-            db.ref('dossiers').limitToLast(15).on('value', snapshot => {
-                const data = snapshot.val();
-                if(!data) {
-                    feedList.innerHTML = '<div style="color:#94a3b8; font-size:0.75em; font-style:italic;">Nog geen aangiftes ingediend.</div>';
-                    feedCount.innerText = '0 ingeleverd';
-                    return;
-                }
-                feedList.innerHTML = "";
-                const items = Object.values(data).reverse();
-                feedCount.innerText = `${items.length} ingeleverd`;
-
-                items.forEach(item => {
-                    const el = document.createElement('div');
-                    el.className = 'feed-item';
-                    el.innerHTML = `
-                        <span><b>[${item.klas || 'Klas'}] ${item.casus || 'Casus'}:</b> "${item.tekst || ''}"</span>
-                        <span class="feed-badge">✓ ${item.tijdstip || 'Zojuist'}</span>
-                    `;
-                    feedList.appendChild(el);
-                });
-            });
-        } catch(e) {
-            console.warn("Livefeed fout:", e);
+            await getDossiersRef().child(`${selectedDossierId}/beoordelingen`).push(reviewPayload);
+            setStars(0);
+            document.getElementById('reviewComment').value = '';
+            document.querySelectorAll('#quickTags .q-tag').forEach(b => b.classList.remove('active'));
+        } catch (err) {
+            console.error("Fout bij opslaan beoordeling:", err);
+            alert("Beoordeling kon niet worden opgeslagen: " + (err.message || err));
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "📨 Beoordeling Plaatsen";
         }
     }
 
@@ -1335,16 +1815,48 @@ GEDRAGSREGELS:
     let objects = {};
     let isDrawing = false, isDragging = false;
     let draggedId = null, currentPathId = null;
+    let localPathPoints = [];
+    let lastSyncTime = 0;
     let offsetX = 0, offsetY = 0;
     let currentBoardRef = null;
 
-    // Status sync
     digibordDb.ref(".info/connected").on("value", (snap) => {
         if (snap.val()) { 
             statusLabel.innerText = "● LIVE"; 
+            statusLabel.classList.remove('error');
             statusLabel.classList.add('online'); 
+        } else {
+            statusLabel.innerText = "Verbinden...";
+            statusLabel.classList.remove('online');
         }
     });
+
+    function renderBoard() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        Object.entries(objects).forEach(([key, obj]) => {
+            if (!obj) return;
+            const isSel = key === draggedId;
+            if (obj.type === 'text') {
+                ctx.font = "bold 24px 'Outfit', Arial";
+                ctx.fillStyle = isSel ? "#003082" : "#1e293b";
+                ctx.fillText(obj.text, obj.x, obj.y);
+                if (isSel) {
+                    ctx.strokeStyle = "#003082";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(obj.x - 5, obj.y - 30, ctx.measureText(obj.text).width + 10, 40);
+                }
+            } else if (obj.type === 'path' && obj.points && obj.points.length > 0) {
+                ctx.strokeStyle = "#0284c7";
+                ctx.lineWidth = 4;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                ctx.beginPath();
+                ctx.moveTo(obj.points[0].x, obj.points[0].y);
+                obj.points.forEach(p => ctx.lineTo(p.x, p.y));
+                ctx.stroke();
+            }
+        });
+    }
 
     const getPos = (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -1364,12 +1876,13 @@ GEDRAGSREGELS:
 
         const entries = Object.entries(objects).reverse();
         for (const [id, obj] of entries) {
-            if (obj.type === 'text') {
+            if (obj && obj.type === 'text') {
                 ctx.font = "bold 24px 'Outfit', Arial";
                 const w = ctx.measureText(obj.text).width;
                 if (x > obj.x - 10 && x < obj.x + w + 10 && y > obj.y - 35 && y < obj.y + 15) {
                     draggedId = id; isDragging = true;
                     offsetX = x - obj.x; offsetY = y - obj.y;
+                    renderBoard();
                     return;
                 }
             }
@@ -1377,24 +1890,43 @@ GEDRAGSREGELS:
         isDrawing = true;
         const newPathRef = digibordDb.ref(`classes/${actieveKlas}/board`).push();
         currentPathId = newPathRef.key;
-        newPathRef.set({ type: 'path', points: [{x, y}] });
+        localPathPoints = [{ x, y }];
+        objects[currentPathId] = { type: 'path', points: localPathPoints };
+        renderBoard();
+        newPathRef.set({ type: 'path', points: localPathPoints }).catch(err => console.error("Tekenen sync fout:", err));
+        lastSyncTime = Date.now();
     };
 
     const moveAction = (e) => {
         if (!isDragging && !isDrawing) return;
         const { x, y, rawX, rawY } = getPos(e);
+        const now = Date.now();
 
-        if (isDragging && draggedId) {
-            digibordDb.ref(`classes/${actieveKlas}/board/${draggedId}`).update({ x: x - offsetX, y: y - offsetY });
+        if (isDragging && draggedId && objects[draggedId]) {
+            const nx = x - offsetX;
+            const ny = y - offsetY;
+            objects[draggedId].x = nx;
+            objects[draggedId].y = ny;
+            renderBoard();
+
             const tRect = trashZone.getBoundingClientRect();
             trashZone.classList.toggle('active', rawX > tRect.left && rawX < tRect.right && rawY > tRect.top && rawY < tRect.bottom);
+
+            if (now - lastSyncTime > 45) {
+                lastSyncTime = now;
+                digibordDb.ref(`classes/${actieveKlas}/board/${draggedId}`).update({ x: nx, y: ny });
+            }
         } else if (isDrawing && currentPathId) {
-            const path = objects[currentPathId];
-            if (path && path.points) {
-                const lastP = path.points[path.points.length - 1];
-                if (Math.hypot(x - lastP.x, y - lastP.y) > 5) {
-                    digibordDb.ref(`classes/${actieveKlas}/board/${currentPathId}`).update({ 
-                        points: [...path.points, {x, y}] 
+            const lastP = localPathPoints[localPathPoints.length - 1];
+            if (!lastP || Math.hypot(x - lastP.x, y - lastP.y) > 4) {
+                localPathPoints.push({ x, y });
+                objects[currentPathId] = { type: 'path', points: localPathPoints };
+                renderBoard();
+
+                if (now - lastSyncTime > 50) {
+                    lastSyncTime = now;
+                    digibordDb.ref(`classes/${actieveKlas}/board/${currentPathId}`).update({
+                        points: localPathPoints
                     });
                 }
             }
@@ -1402,11 +1934,26 @@ GEDRAGSREGELS:
     };
 
     const stopAction = () => {
-        if (isDragging && draggedId && trashZone.classList.contains('active')) {
-            digibordDb.ref(`classes/${actieveKlas}/board/${draggedId}`).remove();
+        if (isDragging && draggedId) {
+            if (trashZone.classList.contains('active')) {
+                delete objects[draggedId];
+                digibordDb.ref(`classes/${actieveKlas}/board/${draggedId}`).remove();
+                renderBoard();
+            } else if (objects[draggedId]) {
+                digibordDb.ref(`classes/${actieveKlas}/board/${draggedId}`).update({
+                    x: objects[draggedId].x,
+                    y: objects[draggedId].y
+                });
+            }
+        } else if (isDrawing && currentPathId && localPathPoints.length) {
+            digibordDb.ref(`classes/${actieveKlas}/board/${currentPathId}`).set({
+                type: 'path',
+                points: localPathPoints
+            });
         }
         isDrawing = isDragging = false;
         draggedId = currentPathId = null;
+        localPathPoints = [];
         trashZone.classList.remove('active');
     };
 
@@ -1415,16 +1962,20 @@ GEDRAGSREGELS:
     window.addEventListener('mouseup', stopAction);
 
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startAction(e); }, { passive: false });
-    window.addEventListener('touchmove', (e) => { e.preventDefault(); moveAction(e); }, { passive: false });
+    window.addEventListener('touchmove', (e) => { if (isDrawing || isDragging) e.preventDefault(); moveAction(e); }, { passive: false });
     window.addEventListener('touchend', stopAction);
 
-    document.getElementById('addBtn').onclick = () => {
-        const val = document.getElementById('wordInput').value.trim();
+    function voegWoordToe() {
+        const inp = document.getElementById('wordInput');
+        const val = inp.value.trim();
         if (val) {
-            digibordDb.ref(`classes/${actieveKlas}/board`).push({ type: 'text', text: val, x: 150, y: 150 });
-            document.getElementById('wordInput').value = '';
+            const rx = 120 + Math.floor(Math.random() * 200);
+            const ry = 120 + Math.floor(Math.random() * 180);
+            digibordDb.ref(`classes/${actieveKlas}/board`).push({ type: 'text', text: val, x: rx, y: ry });
+            inp.value = '';
+            inp.focus();
         }
-    };
+    }
 
     document.getElementById('clearBtn').onclick = () => {
         if (confirm(`Hele bord van klas ${actieveKlas} wissen?`)) {
@@ -1438,27 +1989,21 @@ GEDRAGSREGELS:
 
         currentBoardRef = digibordDb.ref(`classes/${actieveKlas}/board`);
         currentBoardRef.on('value', (snap) => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            objects = snap.val() || {};
-            snap.forEach((child) => {
-                const obj = child.val();
-                const isSel = child.key === draggedId;
-                if (obj.type === 'text') {
-                    ctx.font = "bold 24px 'Outfit', Arial";
-                    ctx.fillStyle = isSel ? "#003082" : "#1e293b";
-                    ctx.fillText(obj.text, obj.x, obj.y);
-                    if (isSel) {
-                        ctx.strokeStyle = "#003082";
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(obj.x - 5, obj.y - 30, ctx.measureText(obj.text).width + 10, 40);
-                    }
-                } else if (obj.type === 'path' && obj.points && obj.points.length > 0) {
-                    ctx.strokeStyle = "#0284c7"; ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.beginPath();
-                    ctx.moveTo(obj.points[0].x, obj.points[0].y);
-                    obj.points.forEach(p => ctx.lineTo(p.x, p.y));
-                    ctx.stroke();
-                }
-            });
+            const serverData = snap.val() || {};
+            // Behoud actieve lokale tekening/versleping zodat snelle beweging niet terugspringt
+            if (isDrawing && currentPathId) {
+                serverData[currentPathId] = { type: 'path', points: localPathPoints };
+            }
+            if (isDragging && draggedId && objects[draggedId]) {
+                serverData[draggedId] = objects[draggedId];
+            }
+            objects = serverData;
+            renderBoard();
+        }, (err) => {
+            console.error("Digibord sync fout:", err);
+            statusLabel.innerText = "Fout bij laden bord";
+            statusLabel.classList.remove('online');
+            statusLabel.classList.add('error');
         });
     }
 
@@ -1466,7 +2011,6 @@ GEDRAGSREGELS:
     window.onload = () => {
         initRandomCasus();
         renderGrammaticaOefening();
-        activeerLiveFeed();
 
         const opgeslagenKlas = sessionStorage.getItem('politie_klas');
         const opgeslagenStudent = sessionStorage.getItem('politie_student');
@@ -1476,6 +2020,7 @@ GEDRAGSREGELS:
             document.getElementById('klasDisplay').innerText = `Klas: ${actieveKlas} (${studentNaam})`;
             document.getElementById('loginOverlay').style.display = 'none';
             initDigibordSync();
+            activeerLiveFeed();
         }
     };
 </script>
