@@ -452,9 +452,385 @@
 </div>
 
 <script>
-    // --- GROQ API CONFIGURATIE ---
-    const GROQ_API_KEY = "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";
-    const GROQ_MODEL = "llama-3.3-70b-versatile";
+    // --- LOKALE CHATBOT-ENGINE (ZONDER API KEY) ---
+    let botState = { id: null, seen: {}, last: [], offer: null, turn: 0, fb: 0 };
+
+    const botKB = {
+        0: {
+            aanhef: "agent", faceType: "lang", beardType: "hout",
+            groet: "Goedendag agent. Fijn dat u tijd heeft, ik baal enorm van die fietsdiefstal vannacht.",
+            comfort: "Dank u wel agent, een slokje water helpt wel. Ik heb die fiets elke dag nodig voor mijn studie.",
+            afsluit: "Heel erg bedankt voor het opnemen van mijn aangifte, agent. Ik hoop dat jullie hem snel pakken!",
+            wacht: "Neemt u gerust de tijd om alles te noteren, agent.",
+            naam: "Mijn volledige naam is Evi de Vries.",
+            geb: "Ik ben geboren op 4 november 2002 (04-11-2002), dus ik ben 22 jaar oud.",
+            adres: "Ik woon aan het Vredenburg 24-B in Utrecht en ik studeer hier in de stad.",
+            delict: [
+                "Vannacht hoorde ik gerommel voor de deur en zag ik een man mijn witte Gazelle Esprit fiets meenemen — hij knipte mijn cijferslot door en ging er meteen vandoor!",
+                "Rond 03:00 uur vannacht sloeg die kerel toe voor mijn appartement: hij forceerde mijn cijferslot en vluchtte razendsnel met mijn fiets."
+            ],
+            buit: [
+                "Het gaat om mijn witte Gazelle Esprit damesfiets met een dagwaarde van ongeveer € 650,-. Alleen mijn kapotgeknipte cijferslot lag nog op straat.",
+                "Ik ben mijn witte Gazelle Esprit kwijt (waarde € 650,-); het doorgeknipte cijferslot bleef op de klinkers achter."
+            ],
+            slot: "Hij stond netjes vast met een degelijk cijferslot, maar dat cijferslot lag kapotgeknipt op de grond.",
+            tijd: "Het gebeurde vannacht rond 03:00 uur.",
+            locatie: "Aan het Vredenburg 24-B in Utrecht, pal voor mijn voordeur.",
+            omgeving: [
+                "Het was 's nachts en aardedonker op straat: de klinkers waren nat en glimmend onder flikkerende straatlantaarns, en bij de horeca stonden stapels terrasstoelen aan sloten.",
+                "Er hing een kille nachtlucht op dat donkere Vredenburg; het flikkerende lantaarnlicht weerspiegelde op de natte klinkers langs de opgestapelde terrassen van de cafés."
+            ],
+            postuur: "Het was een man van ca. 1.85 meter lang met een normaal tot licht gezet postuur.",
+            kleding: "Hij droeg een donkerblauwe gewatteerde jas (parka) met capuchon, een zwarte spijkerbroek en donkere schoenen.",
+            hoofd: "een langwerpig, smal en hoekig gezicht met een scherpe, strakke kaaklijn",
+            baard: "een lange, ruige volle baard (houthakkersbaard) van 5 à 6 centimeter lang, ongekamd en kastanjebruin met een rossige gloed",
+            toestemming: "Nee, natuurlijk heb ik niemand toestemming gegeven! Ik wil absoluut officieel aangifte doen.",
+            bewijs: "Het was uitgestorven vannacht dus ik zag geen getuigen, maar bij de horeca hangen mogelijk camera's en het doorgeknipte cijferslot ligt er nog.",
+            vlucht: "Hij schoot er met mijn fiets razendsnel vandoor richting het eind van het Vredenburg.",
+            spraak: "Hij zei helemaal niets; hij keek heel even op onder de lantaarn en ging er meteen vandoor.",
+            emotie: "Zelf ben ik ongedeerd omdat ik nog binnen was, maar ik ben enorm geschrokken en boos.",
+            bekende: "Nee agent, ik heb die man echt nog nooit van mijn leven gezien.",
+            leeftijdDader: "Ik schat hem ergens begin of halverwege de dertig jaar.",
+            wapen: "Geen mes of vuurwapen gezien, wel moet hij een betonschaar of kniptang gebruikt hebben voor mijn cijferslot.",
+            extra: "Geen bril, tatoeages of littekens gezien; vooral dat hoekige gezicht en die grote houthakkersbaard vielen op.",
+            huid: "In het schemerige lantaarnlicht leek hij licht tot gemiddeld getint onder die rossig-bruine baard.",
+            fallback: [
+                "Eerlijk gezegd weet ik dat niet precies, agent. Wilt u anders nog iets weten over het signalement, hoe de straat eruitzag of mijn gestolen Gazelle-fiets?",
+                "Daar heb ik vannacht in de gauwigheid niet op gelet, agent. Vraagt u me gerust verder naar zijn gezicht, kleding of de toedracht."
+            ]
+        },
+        1: {
+            aanhef: "agent", faceType: "rond", beardType: "ring",
+            groet: "Goedemiddag agent. Mooi dat u er bent, ik heb de camerabeelden van de diefstal nog scherp in mijn hoofd zitten.",
+            comfort: "Dank u wel agent, ik ben niet snel van mijn stuk, al blijft winkeldiefstal bloedirritant.",
+            afsluit: "Uitstekend agent, ik zet de camerabeelden meteen klaar voor uw dossier. Goede dienst verder!",
+            wacht: "Gaat u rustig verder agent, ik heb mijn notities bij de hand.",
+            naam: "Ik heet Evert Pot.",
+            geb: "Ik ben geboren op 18 mei 1976 (18-05-1976), dus ik ben 48 jaar oud.",
+            adres: "Ik ben de filiaalmanager van deze Albert Heijn (AH) aan de Leusderweg in Amersfoort.",
+            delict: [
+                "Een man liep pad 4 in, pakte een fles Andrélon shampoo uit het schap, stopte die in de binnenzak van zijn jas en liep zonder te betalen de winkel uit.",
+                "Ik zag het zojuist op onze camerabeelden gebeuren: hij moffelde die shampoo uit pad 4 in zijn jasbinnenzak en wandelde brutaal langs de kassa's naar buiten."
+            ],
+            buit: [
+                "Het betreft één fles Andrélon shampoo ter waarde van € 4,79.",
+                "De buit is een fles Andrélon shampoo (€ 4,79); wij doen uit principe altijd aangifte."
+            ],
+            slot: "Op een fles shampoo zit geen alarmtag, maar hij liep zonder te betalen door de kassa's en poortjes.",
+            tijd: "Dat gebeurde zojuist vanmiddag, nog geen halfuur geleden.",
+            locatie: "In ons Albert Heijn filiaal aan de Leusderweg in Amersfoort, in pad 4.",
+            omgeving: [
+                "Het gebeurde in pad 4 bij de persoonlijke verzorgingsmiddelen en shampoo, pal naast het gangpad van de chips en borrelnootjes. Het was een drukke winkel met fel wit TL-licht, piepende zelfscankassa's en winkelwagentjes.",
+                "In dat gangpad ruik je altijd een mengeling van zoete shampoogeur en paprikachips; onder dat felle witte TL-licht zag onze camera hem haarscherp."
+            ],
+            postuur: "Een man van ongeveer 1.85 meter lang met een normaal tot licht gezet postuur.",
+            kleding: "Hij droeg een donkerblauwe gewatteerde jas (parka) met capuchon, een zwarte spijkerbroek en grijze sneakers.",
+            hoofd: "een opvallend rond tot ovaal gezicht met volle wangen",
+            baard: "een strak getrimde ringbaard (goatee rond de mond en kin) van circa 1 centimeter, donkerbruin met enkele grijze haartjes, terwijl zijn wangen en hals spekglad geschoren waren",
+            toestemming: "Uiteraard had hij geen toestemming om die fles zonder betaling mee te nemen! Ik doe namens AH officieel aangifte.",
+            bewijs: "We hebben uitstekende camerabeelden waarop hij de fles in zijn binnenzak stopt en wegloopt, en een medewerker zag hem haastig langs de poortjes gaan.",
+            vlucht: "Hij zette buiten flink de pas erin over de parkeerplaats richting de Leusderweg.",
+            spraak: "Hij mompelde langs een klant zachtjes 'pardon' bij het uitgaan, verder zei hij niets.",
+            emotie: "Er is gelukkig geen geweld gebruikt, maar dit soort brutale winkeldiefstallen moet aangepakt worden.",
+            bekende: "Nee agent, ik heb die man nog nooit eerder als klant gezien.",
+            leeftijdDader: "Gezien de enkele grijze haartjes in zijn ringbaard schat ik hem eind dertig of begin veertig.",
+            wapen: "Nee, er was geen sprake van een wapen of bedreiging.",
+            extra: "Geen bril, pet of tatoeages gezien; zijn capuchon zat omlaag dus zijn gezicht stond volledig op beeld.",
+            huid: "Onder het felle TL-licht had hij een vrij lichte huidskleur.",
+            fallback: [
+                "Op dat punt moet ik u het antwoord schuldig blijven, agent. Ik kan u wel alles vertellen over de winkeldiefstal in pad 4, de camerabeelden en het signalement.",
+                "Dat heb ik op de camerabeelden niet kunnen waarnemen, agent. Vraagt u gerust verder naar zijn gezicht, baard of kleding."
+            ]
+        },
+        2: {
+            aanhef: "agent", faceType: "hart", beardType: "stop",
+            groet: "Hallo agent... dank u wel dat ik meteen mijn verhaal mag doen, ik ben nog zo ontzettend geschrokken.",
+            comfort: "Dank u wel agent, een slokje water helpt wel even... ik zit nog helemaal te trillen.",
+            afsluit: "Dank u wel dat u zo serieus naar me geluisterd heeft, agent. Ik hoop uit de grond van mijn hart dat hij snel wordt gepakt.",
+            wacht: "Neemt u rustig de tijd agent, ik wacht op uw volgende vraag.",
+            naam: "Mijn naam is Lisa Lood.",
+            geb: "Ik ben geboren op 14 september 1997 (14-09-1997), dus ik ben 27 jaar oud.",
+            adres: "Ik woon aan de Singelstraat 12 in Utrecht.",
+            delict: [
+                "Ik liep door het park naar huis toen een man me uit het niets vastgreep en onzedelijk betastte — hij zat over mijn kleding heen aan mijn borsten en billen. Een pure aanranding...",
+                "Hij viel me op dat donkere pad ineens aan, greep me stevig vast en betastte mijn borsten en billen over mijn kleren heen tot ik begon te gillen."
+            ],
+            buit: [
+                "Hij heeft niets van mijn spullen gestolen; het ging hem echt om die onzedelijke betasting. De emotionele klap is wel gigantisch.",
+                "Er is geen geld of telefoon meegenomen, maar door die aanranding voel ik me ontzettend onveilig."
+            ],
+            slot: "Het gebeurde buiten op straat in het park, niet bij een woning of fiets.",
+            tijd: "Het gebeurde vanavond rond 22:45 uur.",
+            locatie: "Op het wandelpad in het Zocherpark nabij de Singel, niet ver van mijn woning aan de Singelstraat in Utrecht.",
+            omgeving: [
+                "Het was aardedonker tussen de hoge bomen op het natte asfalt na een regenbui. Ik rook natte herfstbladeren, zag één flauwe oranje straatlantaarn in de verte en hoorde het zachte gezoem van een transformatorkast.",
+                "Pikkedonker onder de bomen na de regen: klam nat asfalt, de geur van natte herfstbladeren en alleen dat zwakke oranje schijnsel van een straatlantaarn verderop."
+            ],
+            postuur: "Hij was ongeveer 1.75 meter lang en opvallend slank en tenger gebouwd.",
+            kleding: "Hij droeg een olijfgroen bomberjack, een lichtgrijze joggingbroek en witte sportschoenen.",
+            hoofd: "een hartvormig gezicht met hoge, brede jukbeenderen en een smalle, spitse kin",
+            baard: "een lichte, vlassige drie-dagen-stoppelbaard (driedagenbaard) van enkele millimeters over kaak en wangen — blond tot lichtrossige stoppels, nauwelijks een snor",
+            toestemming: "Natuurlijk heb ik hem op geen enkele manier toestemming gegeven! Ik wil absoluut officieel aangifte doen.",
+            bewijs: "Het parkpad was verlaten door de regen dus directe getuigen waren er niet, maar bij de uitgang richting de Singel hangt misschien een gemeentecamera.",
+            vlucht: "Zodra ik hard gilde, liet hij los en sprintte hij het pad af richting de Singel.",
+            spraak: "Hij zei helemaal niets — geen woord! Hij greep me zwijgend beet en vluchtte toen ik schreeuwde.",
+            emotie: "Ik heb gelukkig geen blauwe plekken door mijn jas, maar geestelijk ben ik helemaal overstuur.",
+            bekende: "Nee, ik heb hem nog nooit eerder gezien — het was een wildvreemde man.",
+            leeftijdDader: "Hij was nog vrij jong, ik schat hem tussen de 25 en 30 jaar oud.",
+            wapen: "Nee, ik heb geen wapen gezien, hij gebruikte alleen zijn handen.",
+            extra: "Geen bril, capuchon of tatoeages gezien; onder het oranje schijnsel van de lantaarn zag ik zijn gezicht duidelijk.",
+            huid: "Hij had een lichte huidskleur, passend bij die blonde tot lichtrossige stoppels.",
+            fallback: [
+                "Sorry agent, door de schrik kan ik daar even geen goed antwoord op geven... Wat ik me wél heel scherp herinner is wat er in het Zocherpark gebeurde en hoe hij eruitzag.",
+                "Dat weet ik door de paniek helaas niet, agent. Vraagt u me gerust nog naar zijn gezicht, kleding of de omgeving."
+            ]
+        },
+        3: {
+            aanhef: "meneer de agent", faceType: "vier", beardType: "sik",
+            groet: "Dag meneer de agent. Neemt u mij niet kwalijk dat ik zo van slag ben, op mijn leeftijd schrik je enorm van zoiets.",
+            comfort: "Ach, wat uiterst attent van u, meneer de agent. Een kopje thee of water sla ik zeker niet af. Ik schaam me dat ik erin ben getrapt...",
+            afsluit: "Ik dank u zeer hartelijk voor uw goede zorgen en geduld, meneer de agent. Een heel goede dag gewenst!",
+            wacht: "Neemt u alle tijd meneer de agent, ik wacht beleefd af.",
+            naam: "Mijn naam is Lodewijk van der Ee.",
+            geb: "Ik ben geboren op 3 februari 1943 (03-02-1943), dus ik ben een bejaarde man van 81 jaar oud.",
+            adres: "Ik woon alleen in een seniorenappartement aan de Parklaan 88-A in Amersfoort.",
+            delict: [
+                "Een keurige jongeman pleegde een geraffineerde babbeltruc aan mijn voordeur: hij deed zich voor als controleur van de watermeter en de bankmedewerker, leidde me af en nam met die oplichting mijn portemonnee mee.",
+                "Met een gladde smoes over controle van de waterleiding en mijn bankrekening praatte hij zich naar binnen en ontfutselde hij mijn geld en pinpas."
+            ],
+            buit: [
+                "Mijn portemonnee met € 350,- aan contant geld en mijn pinpas zijn gestolen. Gelukkig heeft mijn buurvrouw meteen geholpen de bank te bellen om de pinpas te blokkeren.",
+                "Ik ben € 350,- contant, mijn portemonnee en mijn pinpas kwijtgeraakt door die babbeltruc."
+            ],
+            slot: "Op mijn houten voordeur zit een zware koperen ketting (kierstandhouder), maar door zijn geloofwaardige babbel heb ik die helaas losgemaakt.",
+            tijd: "Dat gebeurde zojuist overdag, ongeveer een uurtje geleden.",
+            locatie: "Bij mij thuis aan de voordeur, Parklaan 88-A in Amersfoort.",
+            omgeving: [
+                "Het gebeurde in de gang bij mijn houten voordeur met de koperen ketting. Daar hangt klassiek groen-geel bloemetjesbehang, ligt zacht hoogpolig tapijt, staat mijn eikenhouten kapstok met regenjas en rook het naar verse filterkoffie en lavendelzeep.",
+                "In mijn gang hing de geur van filterkoffie en lavendelzeep; naast het bloemetjesbehang, het hoogpolige tapijt en de eikenhouten kapstok stond hij pal binnen de voordeur."
+            ],
+            postuur: "De jongeman was ongeveer 1.75 meter lang en opvallend slank en tenger gebouwd.",
+            kleding: "Hij droeg een olijfgroen jack (een soort bomberjack), een lichte grijze broek en witte sportschoenen.",
+            hoofd: "een vierkant, blokvormig hoofd met een brede, platte kaaklijn en een stompe kin",
+            baard: "een uiterst precies gestyled klein sikje op de punt van zijn kin en een smal potloodsnorretje, met ravenzwart haar en volkomen gladde wangen en kaakhoeken",
+            toestemming: "Welnee meneer de agent, ik heb hem uiteraard geen enkele toestemming gegeven om mijn spullen, pinpas of € 350,- mee te nemen! Ik doe graag aangifte.",
+            bewijs: "Bij de centrale benedenentree van ons seniorencomplex hangt een VvE-camera waar hij op kan staan; wellicht zag een buurvrouw hem ook.",
+            vlucht: "Zodra hij mijn portemonnee had, ging hij er vliegensvlug vandoor via de centrale hal naar buiten richting de Parklaan.",
+            spraak: "Hij sprak buitengewoon vlot, keurig en beleefd Nederlands zonder opvallend accent — daarom klonk die babbeltruc helaas zo betrouwbaar.",
+            emotie: "Hij heeft mij niet aangeraakt of pijn gedaan, maar mijn vertrouwen is ernstig beschaamd en ik ben zeer aangedaan.",
+            bekende: "Nee meneer de agent, ik had die jongeman nooit eerder gezien.",
+            leeftijdDader: "Een jongeman nog, ik schat hem een jaar of 25 à 30.",
+            wapen: "Nee hoor, geen enkel wapen gezien; hij gebruikte alleen zijn gladde praatjes.",
+            extra: "Geen bril of tatoeages gezien; in het ganglicht was zijn vierkante gezicht met dat ravenzwarte haar goed te zien.",
+            huid: "Een lichte tot lichtgetinte, verzorgde jongeman met ravenzwart haar.",
+            fallback: [
+                "Neemt u mij niet kwalijk, meneer de agent, daar weet ik zo geen antwoord op. Maar vraagt u mij gerust nog naar de babbeltruc, mijn gang of het signalement van die jongeman.",
+                "Och, daar heb ik in alle consternatie niet op gelet, meneer de agent. Wilt u nog iets weten over zijn gezicht, het sikje of de gestolen € 350,-?"
+            ]
+        }
+    };
+
+    function normTxt(s) {
+        return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[?!.,;:"'()]/g, " ").replace(/\s+/g, " ").trim();
+    }
+
+    function pickKB(d, key) {
+        const val = d[key];
+        const idx = botState.seen[key] || 0;
+        botState.seen[key] = idx + 1;
+        if (Array.isArray(val)) {
+            if (idx < val.length) return val[idx];
+            return "Ik blijf bij wat ik eerder aangaf: " + val[idx % val.length].charAt(0).toLowerCase() + val[idx % val.length].slice(1);
+        }
+        if (key === "hoofd") {
+            const f = ["Hij had " + val + ".", "Als ik op zijn hoofdvorm let, zag ik duidelijk " + val + "."];
+            return idx < 2 ? f[idx] : "Zoals ik net zei, had hij " + val + ".";
+        }
+        if (key === "baard") {
+            const b = ["Qua gezichtsbeharing viel me op: hij had " + val + ".", "Preciezer omschreven had hij " + val + "."];
+            return idx < 2 ? b[idx] : "Nogmaals, hij had echt " + val + ".";
+        }
+        if (idx === 0) return val;
+        const wrap = ["Zoals ik al even noemde: ", "Ik kan alleen maar herhalen dat: "];
+        return wrap[(idx - 1) % wrap.length] + val.charAt(0).toLowerCase() + val.slice(1);
+    }
+
+    function stressPrefix(d) {
+        if (botState.turn < 3) return "";
+        if (stress > 70 && botState.turn % 3 === 0) {
+            const p = [
+                `${d.aanhef === "meneer de agent" ? "Meneer de agent" : "Agent"}, ik word eerlijk gezegd een beetje kriegelig van al dat doorvragen, maar goed. `,
+                `Mijn geduld raakt nu wel echt op ${d.aanhef}, maar ik geef u antwoord. `
+            ];
+            return p[botState.turn % p.length];
+        }
+        if (stress > 40 && stress <= 70 && botState.turn % 4 === 0) {
+            return `Ik hoop dat we bijna klaar zijn ${d.aanhef}, maar goed. `;
+        }
+        return "";
+    }
+
+    function genereerLokaalAntwoord(ruweVraag) {
+        if (!actieveCasus) return "Goedendag agent, waarmee kan ik u helpen?";
+        if (chatHistorie.length <= 1 || botState.id !== actieveCasus.id) {
+            botState = { id: actieveCasus.id, seen: {}, last: [], offer: null, turn: 0, fb: 0 };
+        }
+        botState.turn++;
+        const d = botKB[actieveCasus.id];
+        const n = normTxt(ruweVraag);
+        const words = n ? n.split(" ") : [];
+
+        if (/\b(cautie|niet tot antwoorden verplicht|recht op een advocaat)\b/.test(n)) {
+            botState.offer = null;
+            return `Ik ben de aangever hoor ${d.aanhef}, geen verdachte! Maar vraagt u maar raak hoor.`;
+        }
+
+        // Specifieke contrastchecks (baard- & hoofdvorm)
+        const cChecks = [
+            { t: "ring", k: "beard", re: /\b(ringbaard|goatee)\b/ },
+            { t: "hout", k: "beard", re: /\b(houthakker|houthakkersbaard|volle baard|ruige baard|lange baard)\b/ },
+            { t: "stop", k: "beard", re: /\b(stoppel|stoppels|stoppelbaard|driedagen|drie dagen)\b/ },
+            { t: "sik",  k: "beard", re: /\b(sik|sikje|potloodsnor|snorretje|snor)\b/ },
+            { t: "rond", k: "face",  re: /\b(rond|ovaal|volle wangen)\b/ },
+            { t: "lang", k: "face",  re: /\b(langwerpig|hoekig|smal)\b/ },
+            { t: "hart", k: "face",  re: /\b(hartvormig|spits|puntig|jukbeenderen)\b/ },
+            { t: "vier", k: "face",  re: /\b(vierkant|blokvormig|brede kaak|plat|stomp)\b/ }
+        ].filter(c => c.re.test(n));
+
+        const timeNoise = /\b(rond \d|uur|tijd|laat|wanneer)\b/.test(n) && !/\b(gezicht|hoofd|wangen|kaak|kin|vorm)\b/.test(n);
+        if (cChecks.length === 1 && !timeNoise) {
+            const c = cChecks[0];
+            if (!(c.t === "lang" && /\bsmal\b/.test(n) && !/\b(gezicht|hoofd|vorm|kaak|kin|dader|man|hij)\b/.test(n))) {
+                botState.offer = null;
+                const match = (c.k === "beard" && c.t === d.beardType) || (c.k === "face" && c.t === d.faceType);
+                const topic = c.k === "beard" ? "baard" : "hoofd";
+                botState.seen[topic] = (botState.seen[topic] || 0) + 1;
+                botState.last = [topic];
+                const core = d[topic];
+                return stressPrefix(d) + (match
+                    ? `Ja precies, dat klopt helemaal! Hij had inderdaad ${core}.`
+                    : `Nee hoor, dat klopt niet — hij had juist ${core}.`);
+            }
+        }
+
+        // Bevestiging op eerder aanbod ("ja graag", "vertel maar")
+        if (words.length <= 5 && /^(ja+|jazeker|graag|zeker|vertel|vertel maar|doe maar|ga verder|en verder|en toen|daarna|meer|nog meer|ok|oke|prima)\b/.test(n) && botState.offer === "gezicht") {
+            botState.offer = null;
+            botState.last = ["hoofd", "baard"];
+            return stressPrefix(d) + pickKB(d, "hoofd") + " " + pickKB(d, "baard");
+        }
+
+        // Vervolgvraag over kleur
+        if (/\b(welke kleur|wat voor kleur|kleuren|kleur)\b/.test(n) && !/\b(huidskleur|jas|broek|schoen|fiets|baard|haar)\b/.test(n)) {
+            botState.offer = null;
+            if (botState.last.includes("kleding")) return stressPrefix(d) + pickKB(d, "kleding");
+            if (botState.last.includes("baard")) return stressPrefix(d) + pickKB(d, "baard");
+            if (botState.last.includes("buit") && actieveCasus.id === 0) return stressPrefix(d) + "Mijn fiets is wit — een witte Gazelle Esprit damesfiets.";
+            return stressPrefix(d) + pickKB(d, "kleding") + " " + pickKB(d, "baard");
+        }
+
+        // Multi-intent detectie
+        const det = [];
+        const hasGreet = /\b(hoi|hallo|hey|goedendag|goedemorgen|goedemiddag|goedenavond|dag|welkom)\b/.test(n);
+        const hasComfort = /\b(koffie|thee|water|drinken|glaasje|kopje|gaat het|hoe gaat|hoe voelt|rustig aan|stoel|neem plaats)\b/.test(n);
+        const hasClose = /\b(bedankt|dank u|dankjewel|fijne dag|tot ziens|afronden|ondertekenen|tekenen|dat waren mijn vragen|dat was alles|geen vragen meer)\b/.test(n);
+
+        const asksPersAll = /\b(personalia|uw gegevens|persoonsgegevens|wie bent u|wie is u|voorstellen)\b/.test(n);
+        const asksDaderNaam = /\b(naam van (de|die)|hoe (heet|noemde) (hij|de|die)|kent u|ken je|bekende|vaker gezien|eerder gezien|wie (was|is) (de|het))\b/.test(n);
+        const asksDaderLeeftijd = /\b(hoe oud (was|is|schat)|leeftijd van (de|die|hem)|jong of oud)\b/.test(n);
+
+        if (asksPersAll) {
+            det.push("naam", "geb", "adres");
+        } else {
+            if (!asksDaderNaam && /\b(naam|heet|voornaam|achternaam|identiteit|id|paspoort|rijbewijs)\b/.test(n)) det.push("naam");
+            if (!asksDaderLeeftijd && /\b(geboorte|geboren|geboortedatum|geb datum|leeftijd|hoe oud bent|hoe oud is u|geboortejaar)\b/.test(n)) det.push("geb");
+            if (/\b(woont|adres|woonadres|woonplaats|huisadres|telefoon|telefoonnummer|bereiken|mail|email|functie|beroep|werk|studie|studeert|filiaalmanager|albert heijn|werkgever)\b/.test(n) && !/\badres van het incident\b/.test(n)) det.push("adres");
+        }
+
+        if (asksDaderNaam) det.push("bekende");
+        if (asksDaderLeeftijd) det.push("leeftijdDader");
+        if (/\b(toestemming|mocht hij|mogen|recht (op|tot)|wilt u aangifte|wil je aangifte|gaat u aangifte|officieel aangifte|straf|vervolgen|aanhouden)\b/.test(n)) det.push("toestemming");
+
+        const pureWhereWhen = /\b(waar|hoe laat|hoelaat|wanneer|welke tijd|welk tijdstip)\b/.test(n) && !/\b(wat|hoe is|toedracht|verhaal|vertel|incident|delict|aanranding|betast|babbeltruc|oplichting|winkeldiefstal)\b/.test(n);
+        if (!pureWhereWhen && (/\b(wat is er gebeurd|hoe is het gebeurd|wat gebeurde|wat kwam u|toedracht|verhaal|vertellen|vertel eens|vanaf het begin|incident|feit|delict|situatie|aanranding|aangerand|betast|babbeltruc|oplichting|opgelicht|smoes|winkeldiefstal|aangevallen)\b/.test(n) || (/\baangifte\b/.test(n) && !det.includes("toestemming") && /\b(waarom|wat|over|voor|doet u|komt u)\b/.test(n)))) {
+            det.push("delict");
+        }
+
+        if (/\b(slot|cijferslot|op slot|beveilig|sleutel|kierstand|ketting|alarmtag|poortjes)\b/.test(n) && !/\b(behang|tapijt|kapstok|omgeving|gang)\b/.test(n)) det.push("slot");
+        if (/\b(buit|gestolen|ontvreemd|kwijt|meegenomen|waarde|dagwaarde|schade|bedrag|prijs|geld|euro|kost|fiets|gazelle|esprit|shampoo|andrelon|fles|portemonnee|pinpas|pas|contant|blokkeren|geblokkeerd)\b/.test(n)) det.push("buit");
+        if (/\b(hoe laat|hoelaat|tijd|tijdstip|wanneer|welke dag|datum|vannacht|vanavond|vanmiddag|vanochtend|hoe lang geleden|hoe lang duurde)\b/.test(n)) det.push("tijd");
+        if (/\b(waar gebeurde|waar vond|waar was|waar stond|waar liep|waar bent u|waar is het|locatie|plek|plaats|plaats delict|welke straat|welk park|welke winkel|welk pad|welk gangpad|vredenburg|leusderweg|zocherpark|singel|parklaan)\b/.test(n) && !/\b(waar woont|waarom|waarvoor)\b/.test(n)) det.push("locatie");
+        if (/\b(omgeving|interieur|exterieur|hoe zag het eruit|hoe zag de straat|hoe zag de winkel|hoe zag de gang|hoe zag het park|sfeer|weer|regen|donker|licht|verlichting|lantaarn|straatlantaarn|tl|geur|rook|ruikt|geluid|hoorde|zag u daar|buiten|binnen|klinkers|terras|horeca|cafe|bomen|asfalt|bladeren|behang|bloemetjes|tapijt|kapstok|voordeur|kassa|zelfscan|chips|borrelnoot|verzorging|pad 4|schappen)\b/.test(n)) det.push("omgeving");
+
+        const asksP = /\b(lengte|hoe lang was|hoe lang is|hoe groot|meter|cm|centimeter|postuur|bouw|lichaam|lichaamsbouw|figuur|slank|tenger|mager|dik|gezet|fors|normaal|gespierd|breed)\b/.test(n);
+        const asksK = /\b(kleding|kleren|outfit|aanhad|droeg|dragen|wat had (hij|de dader|die man|de verdachte) aan|jas|jassen|parka|bomber|bomberjack|jack|trui|broek|spijkerbroek|jeans|jogging|joggingbroek|schoen|schoenen|sneakers|sportschoenen|capuchon)\b/.test(n);
+        const asksH = /\b(hoofdvorm|gezichtsvorm|vorm van (zijn|het) (hoofd|gezicht)|gezicht|hoofd|kaak|kaaklijn|kin|wang|wangen|jukbeenderen|langwerpig|hoekig|rond|ovaal|hartvormig|vierkant|blokvormig|spitse|stompe)\b/.test(n);
+        const asksB = /\b(baard|snor|gezichtsbeharing|beharing|geschoren|stoppel|stoppels|stoppelbaard|ringbaard|goatee|houthakker|houthakkersbaard|sik|sikje|potloodsnor|haarkleur|kapsel|hoofdhaar|kalend|kaal|(zijn|welk|kleur|soort|lang|kort|zwart|blond|bruin|rossig) haar)\b/.test(n);
+        const asksSig = /\b(signalement|omschrijving|omschrijf|beschrijf|uiterlijk|hoe zag (hij|de man|de dader|de verdachte|die man|die jongen|die vent) eruit|wat weet u van (de dader|hem|de verdachte))\b/.test(n);
+
+        if (asksP) det.push("postuur");
+        if (asksK) det.push("kleding");
+        if (asksH) {
+            det.push("hoofd");
+            if (/\bgezicht\b/.test(n) && !/\b(vorm|gezichtsvorm|hoofdvorm|kaak|kin|wangen)\b/.test(n) && !asksB) det.push("baard");
+        }
+        if (asksB) det.push("baard");
+        if (asksSig && !asksP && !asksK && !asksH && !asksB) {
+            if (!botState.seen.postuur || !botState.seen.kleding) {
+                det.push("postuur", "kleding");
+                botState.offer = "gezicht";
+            } else if (!botState.seen.hoofd || !botState.seen.baard) {
+                det.push("hoofd", "baard");
+            } else {
+                det.push("postuur", "kleding", "hoofd", "baard");
+            }
+        }
+
+        if (/\b(camera|camerabeeld|camerabeelden|bewijs|sporen|vingerafdruk|dna|getuige|getuigen|omstander|omstanders|alleen|andere mensen|mensen gezien|politie gebeld|112)\b/.test(n)) det.push("bewijs");
+        if (/\b(vlucht|vluchten|vluchtrichting|gevlucht|kant|richting|waarheen|weggelopen|weggerend|weggefietst|weggereden|vervoer|auto|ontsnapt)\b/.test(n)) det.push("vlucht");
+        if (/\b(zei hij|wat zei|gesproken|gepraat|praatte|stem|spraak|accent|taal|nederlands|gedrag|gedroeg|houding|brutaal|agressief|kalm|zenuwachtig)\b/.test(n)) det.push("spraak");
+        if (/\b(wapen|mes|pistool|vuurwapen|knuppel|betonschaar|tang|koevoet|gereedschap|bedreigd)\b/.test(n)) det.push("wapen");
+        if (/\b(bril|zonnebril|pet|petje|muts|hoed|tatoeage|tattoo|litteken|piercing|oorbel|masker|bivakmuts)\b/.test(n)) det.push("extra");
+        if (/\b(huidskleur|kleur huid|afkomst|etniciteit|blank|getint|donker|lichtgetint)\b/.test(n)) det.push("huid");
+        if (/\b(geschrokken|emotie|gevoel|pijn|letsel|gewond|slachtofferhulp|trauma|nachtmerrie|bang|verdrietig|boos)\b/.test(n)) det.push("emotie");
+
+        const uniq = [...new Set(det)];
+        if (uniq.length > 0) {
+            if (!asksSig) botState.offer = null;
+            const parts = [];
+            if (hasGreet && botState.turn === 1) parts.push(actieveCasus.id === 3 ? "Goedendag meneer de agent." : "Goedendag agent.");
+            if (hasComfort) parts.push(d.comfort);
+            uniq.forEach(t => parts.push(pickKB(d, t)));
+            if (botState.offer === "gezicht") parts.push("Zijn gezichtsvorm en baard vielen me trouwens ook heel scherp op, wilt u die ook precies weten?");
+            if (hasClose) parts.push(d.afsluit);
+            botState.last = uniq;
+            return stressPrefix(d) + parts.join(" ");
+        }
+
+        botState.offer = null;
+        if (hasClose) return d.afsluit;
+        if (hasComfort) return d.comfort;
+        if (hasGreet) return d.groet;
+
+        if (/\b(meer|verder|detail|details|nog iets|anders|opgevallen|hoezo|en toen|daarna|vertel)\b/.test(n)) {
+            for (const prev of botState.last) {
+                if (Array.isArray(d[prev]) && (botState.seen[prev] || 0) < d[prev].length) return stressPrefix(d) + pickKB(d, prev);
+            }
+            const prio = ["delict", "buit", "tijd", "locatie", "omgeving", "postuur", "kleding", "hoofd", "baard", "bewijs", "toestemming"];
+            const nextT = prio.find(t => !botState.seen[t]);
+            if (nextT) {
+                botState.last = [nextT];
+                const txt = pickKB(d, nextT);
+                return stressPrefix(d) + "Wat ik u trouwens nog kan vertellen: " + txt.charAt(0).toLowerCase() + txt.slice(1);
+            }
+        }
+
+        if (/^(ok|oke|duidelijk|begrepen|genoteerd|schrijf|moment|prima|goed)\b/.test(n) && words.length <= 4) return d.wacht;
+
+        const fbTxt = d.fallback[botState.fb % d.fallback.length];
+        botState.fb++;
+        return stressPrefix(d) + fbTxt;
+    }
 
     // --- FIREBASE 1: HOOFDAPP (Aangiftes & Livefeed) ---
     const firebaseConfig = { 
@@ -695,7 +1071,7 @@ GEDRAGSREGELS:
         wisselCasus(index);
     }
 
-    // --- VERHOOR VIA GROQ API ---
+    // --- VERHOOR VIA LOKALE CHATBOT-ENGINE ---
     async function verhoor() {
         const inp = document.getElementById('chatInp');
         const box = document.getElementById('messages');
@@ -712,6 +1088,7 @@ GEDRAGSREGELS:
         inp.value = '';
         box.scrollTop = box.scrollHeight;
 
+        const antwoord = genereerLokaalAntwoord(vraag);
         chatHistorie.push({ role: "user", content: vraag });
 
         const thinkingId = "thinking-" + Date.now();
@@ -722,42 +1099,12 @@ GEDRAGSREGELS:
         sendBtn.disabled = true;
 
         try {
-            const stressStatus = stress > 70 ? "ongeduldig/kribbig" : (stress > 40 ? "emotioneel/afwachtend" : "meewerkend");
-            const dynamicSystemPrompt = `${actieveCasus.systemPrompt}
-Huidige emotionele status: ${stressStatus}. Verwerk dit subtiel in je stijl, maar geef ALTIJD een helder antwoord en herhaal jezelf NOOIT letterlijk.`;
-
-            chatHistorie[0].content = dynamicSystemPrompt;
-
-            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${GROQ_API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: GROQ_MODEL,
-                    messages: chatHistorie,
-                    temperature: 0.65,
-                    max_tokens: 350
-                })
-            });
-
-            const data = await response.json();
+            await new Promise(resolve => setTimeout(resolve, 350 + Math.floor(Math.random() * 250)));
             const thinkingEl = document.getElementById(thinkingId);
             if (thinkingEl) thinkingEl.remove();
 
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-                const antwoord = data.choices[0].message.content.trim();
-                chatHistorie.push({ role: "assistant", content: antwoord });
-                box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> ${antwoord}</div>`;
-            } else {
-                box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> Excuus agent, ik begreep u even niet goed. Kunt u dat nogmaals vragen?</div>`;
-            }
-        } catch (error) {
-            console.error("Groq API Error:", error);
-            const thinkingEl = document.getElementById(thinkingId);
-            if (thinkingEl) thinkingEl.remove();
-            box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> Het schiet me even te binnen: laat me die vraag nog eens rustig beantwoorden...</div>`;
+            chatHistorie.push({ role: "assistant", content: antwoord });
+            box.innerHTML += `<div class="bubble evi"><b>${actieveCasus.naam}:</b> ${antwoord}</div>`;
         } finally {
             isWaitingForAI = false;
             sendBtn.disabled = false;
